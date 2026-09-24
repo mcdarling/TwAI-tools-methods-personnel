@@ -5,8 +5,15 @@ const path = require("node:path");
 const engine = require("../engine.js");
 
 const load = (f) => JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", f), "utf8"));
-const data = { gcmm: load("gcmm.json"), methods: load("methods.json"), roles: load("roles.json") };
 const taxonomy = load("taxonomy.json");
+const data = { gcmm: load("gcmm.json"), methods: load("methods.json"), roles: load("roles.json"), taxonomy };
+const nodes = engine.indexTaxonomy(taxonomy);
+const leaves = (q) => {
+  const out = [];
+  const walk = (opts) => (opts || []).forEach((o) => (o.children ? walk(o.children) : out.push(o.value)));
+  walk(q.options);
+  return out;
+};
 const examples = Object.fromEntries(load("examples.json").examples.map((e) => [e.id, e.answers]));
 
 const reqs = (result) => result.elements.flatMap((e) => e.requirements);
@@ -33,18 +40,60 @@ test("catalog integrity: every requirement has at least one method in the catalo
   }
 });
 
-test("taxonomy answers in examples use declared option values", () => {
+test("taxonomy: category ids are unique and examples use selectable leaf categories", () => {
+  const seen = new Set();
+  const walk = (opts) => (opts || []).forEach((o) => {
+    assert.ok(!seen.has(o.value), `duplicate category id ${o.value}`);
+    seen.add(o.value);
+    walk(o.children);
+  });
+  for (const s of taxonomy.sections) for (const q of s.questions) walk(q.options);
+
   const options = {};
   for (const s of taxonomy.sections) for (const q of s.questions) {
-    if (q.options) options[q.id] = new Set(q.options.map((o) => o.value));
+    if (q.options) options[q.id] = new Set(leaves(q));
     if (q.options_from === "roles") options[q.id] = new Set(data.roles.roles.map((r) => r.id));
   }
   for (const [id, a] of Object.entries(examples)) {
     for (const [k, v] of Object.entries(a)) {
       if (!options[k]) continue;
-      for (const x of [].concat(v)) assert.ok(options[k].has(x), `${id}: ${k}=${x} is not a declared option`);
+      for (const x of [].concat(v)) assert.ok(options[k].has(x), `${id}: ${k}=${x} is not a selectable category`);
     }
   }
+});
+
+test("taxonomy: every category named by methods, paradigms, rules, and checks exists", () => {
+  const known = (key, v) => typeof v === "boolean" || nodes[v] !== undefined || key === "consequence" || key === "deployment";
+  const checkCond = (cond, where) => {
+    for (const [key, vals] of Object.entries(cond || {})) for (const v of vals) assert.ok(known(key, v), `${where}: unknown category ${key}=${v}`);
+  };
+  for (const m of data.methods.methods) checkCond(m.applies, `method ${m.id}`);
+  for (const p of data.gcmm.paradigms) { checkCond(p.when, p.id); for (const c of p.when_any || []) checkCond(c, p.id); }
+  for (const r of data.gcmm.rules) checkCond(r.when, `rule ${r.id}`);
+  for (const c of taxonomy.consistency_checks) { checkCond(c.when, c.id); checkCond(c.expect, c.id); }
+});
+
+test("a method that names a parent category applies to its children", () => {
+  const gnn = engine.evaluate(data, { ...examples["ae-rf"], inputs: ["graph"], algorithm: "gnn", data_regime: "data_abundant" });
+  assert.equal(gnn.elements.flatMap((e) => e.requirements).find((q) => q.id === "ev.convergence").best.id, "training_curves");
+  assert.deepEqual(engine.lineage(nodes, "gnn"), ["gnn", "neural"]);
+});
+
+test("consistency checks fire only when rankings disagree", () => {
+  const ok = engine.evaluate(data, examples["ae-rf"]);
+  assert.ok(!ok.flags.some((f) => f.check));
+  const bad = engine.evaluate(data, { ...examples["ae-rf"], output: "scalar" });
+  assert.ok(bad.flags.some((f) => f.check === "classification-output"));
+  const pinn = engine.evaluate(data, { ...examples["ae-hybrid"], representation: "empirical" });
+  assert.ok(pinn.flags.some((f) => f.check === "pinn-representation"));
+  const unanswered = engine.evaluate(data, { ...examples["ae-rf"], output: undefined });
+  assert.ok(!unanswered.flags.some((f) => f.check === "classification-output"));
+});
+
+test("categories the catalog only partly covers are flagged", () => {
+  const r = engine.evaluate(data, { ...examples["ae-hybrid"], algorithm: "neural_operator", representation: "simulator_surrogate" });
+  assert.ok(r.flags.some((f) => /only partly covers.*Neural operator/.test(f.text)));
+  assert.ok(!engine.evaluate(data, examples["ae-rf"]).flags.some((f) => /only partly covers/.test(f.text)));
 });
 
 test("E3SM case (moderate consequence): supervised-ML rubric, level-1 target, no R&D gaps", () => {
@@ -102,7 +151,7 @@ test("mechanistic models point to PCMM and generate no requirements", () => {
 });
 
 test("generated outputs surface research-grade validation gaps", () => {
-  const r = engine.evaluate(data, { ...examples["ae-rf"], learning: "generative", output: "generated", inputs: ["text"], algorithm: "foundation" });
+  const r = engine.evaluate(data, { ...examples["ae-rf"], learning: "generative", output: "generated_text", inputs: ["text"], problem_type: "generation", algorithm: "foundation" });
   assert.equal(r.paradigm.id, "generative");
   assert.equal(req(r, "gen.output_validity").status, "maturing");
   assert.ok(r.counts.missing > 0, "some evidence has no method at all for generated output");

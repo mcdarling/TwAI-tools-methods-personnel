@@ -82,7 +82,7 @@
       "name": "Explicit mechanistic model (PDE / simulation)",
       "when": {
         "representation": [
-          "mechanistic"
+          "mechanistic_group"
         ]
       },
       "framework": "external",
@@ -100,7 +100,7 @@
         },
         {
           "algorithm": [
-            "pinn"
+            "sciml"
           ]
         }
       ],
@@ -124,7 +124,7 @@
         },
         {
           "algorithm": [
-            "foundation"
+            "generative_family"
           ]
         }
       ],
@@ -154,16 +154,23 @@
     {
       "id": "rl",
       "name": "Reinforcement learning",
-      "when": {
-        "learning": [
-          "reinforcement"
-        ]
-      },
       "framework": "gap",
       "framework_note": "No GCMM instantiation exists for reinforcement learning. The supervised-ML rubric is used as a partial baseline.",
       "rubric": "supervised-ml",
       "extra_requirements": [
         "rl.env_fidelity"
+      ],
+      "when_any": [
+        {
+          "learning": [
+            "reinforcement"
+          ]
+        },
+        {
+          "algorithm": [
+            "rl_family"
+          ]
+        }
       ]
     },
     {
@@ -171,7 +178,8 @@
       "name": "Supervised machine learning",
       "when": {
         "learning": [
-          "supervised"
+          "supervised",
+          "self_supervised"
         ]
       },
       "framework": "instantiated",

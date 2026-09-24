@@ -102,6 +102,34 @@ fieldset.section {
   background: var(--bg); cursor: pointer;
 }
 .opt small { color: var(--muted); font-size: 12px; line-height: 1.3; }
+.opt-groups { display: grid; gap: 10px; }
+.opt-group { display: grid; gap: 6px; }
+.opt-group-label { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+/* View switch */
+.views { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-top: 4px; }
+.view-tab {
+  border: 0; background: none; padding: 8px 12px 10px; cursor: pointer; font-weight: 500; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.view-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* Taxonomy reference */
+.ref { display: grid; gap: 16px; padding-top: 24px; max-width: 980px; }
+.ref-intro { margin: 0; max-width: 72ch; }
+.ref .panel h2 { font-size: 22px; }
+.ref h3 { font-size: 16px; font-weight: 600; font-family: var(--body); }
+.tree, .tree ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.tree ul { margin: 8px 0 0 6px; padding-left: 14px; border-left: 2px solid var(--line); }
+.cat-name { font-weight: 600; }
+.cat-def { margin: 2px 0 0; font-size: 14px; }
+.cat-ex { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.cat-note { margin: 4px 0 0; font-size: 13px; color: var(--warn); }
+.cat-id { font: 400 11px/1 var(--mono); color: var(--muted); margin-left: 6px; }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.checks li { display: grid; gap: 4px; padding-top: 12px; border-top: 1px solid var(--line); }
+.checks li:first-child { border-top: 0; padding-top: 0; }
+.rule-line { font: 400 13px/1.5 var(--mono); }
 .opt input:checked + span { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
 .opt input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
 .toggle { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer; }
@@ -198,19 +226,24 @@ textarea.fallback { width: 100%; min-height: 160px; font: 12px/1.5 var(--mono); 
     <h1>GCMM Project Planner</h1>
     <p>Place your AI project in the taxonomy and set its application context. The planner derives the GCMM maturity target, recommends methods, tools, and people for each credibility element, and lists where R&amp;D is needed because no mature method exists yet.</p>
     <div class="examples" id="examples"><span class="lbl">Load an example:</span></div>
+    <div class="views" role="tablist" aria-label="View">
+      <button type="button" class="view-tab" role="tab" id="tab-planner" data-view="planner" aria-selected="true" aria-controls="view-planner">Planner</button>
+      <button type="button" class="view-tab" role="tab" id="tab-taxonomy" data-view="taxonomy" aria-selected="false" aria-controls="view-taxonomy">Taxonomy reference</button>
+    </div>
   </header>
 
-  <div class="layout">
+  <div class="layout" id="view-planner" role="tabpanel" aria-labelledby="tab-planner">
     <form class="form" id="form" novalidate></form>
     <aside class="report" id="report" aria-live="polite"><p class="sub">Loading catalog…</p></aside>
   </div>
+  <div class="ref" id="view-taxonomy" role="tabpanel" aria-labelledby="tab-taxonomy" hidden></div>
 </div>
 
 <script src="engine.js"></script>
 <script>
 (function () {
   "use strict";
-  var STORE_KEY = "gcmm-planner-answers-v1";
+  var STORE_KEY = "gcmm-planner-answers-v2";
   var data, taxonomy, examples, answers = {}, activeExample = null;
 
   function esc(s) {
@@ -225,12 +258,12 @@ textarea.fallback { width: 100%; min-height: 160px; font: 12px/1.5 var(--mono); 
 
   Promise.all(["data/gcmm.json", "data/methods.json", "data/roles.json", "data/taxonomy.json", "data/examples.json"].map(getJSON))
     .then(function (res) {
-      data = { gcmm: res[0], methods: res[1], roles: res[2] };
       taxonomy = res[3]; examples = res[4].examples;
+      data = { gcmm: res[0], methods: res[1], roles: res[2], taxonomy: taxonomy };
       var saved = restore();
       if (saved && saved.answers) { answers = saved.answers; activeExample = saved.example || null; }
       else { answers = JSON.parse(JSON.stringify(examples[0].answers)); activeExample = examples[0].id; }
-      buildExamples(); buildForm(); update();
+      buildExamples(); buildForm(); buildReference(); setupViews(); update();
     })
     .catch(function (err) {
       document.getElementById("report").innerHTML =
@@ -275,11 +308,18 @@ textarea.fallback { width: 100%; min-height: 160px; font: 12px/1.5 var(--mono); 
           return '<label class="toggle" for="' + id + '"><input type="checkbox" id="' + id + '" data-q="' + q.id + '" data-type="bool"><span>' + esc(q.label) + '</span></label>';
         }
         var type = q.type === "multi" ? "checkbox" : "radio";
-        var opts = optionsFor(q).map(function (o, j) {
-          return '<label class="opt"><input type="' + type + '" id="' + id + '-' + j + '" name="' + id + '" value="' + esc(o.value) + '" data-q="' + q.id + '" data-type="' + q.type + '">' +
+        function optHtml(o) {
+          return '<label class="opt"' + (o.definition ? ' title="' + esc(o.definition) + '"' : '') + '><input type="' + type + '" id="' + id + '-' + esc(o.value) + '" name="' + id + '" value="' + esc(o.value) + '" data-q="' + q.id + '" data-type="' + q.type + '">' +
             '<span>' + esc(o.label) + (o.hint ? '<small>' + esc(o.hint) + '</small>' : '') + '</span></label>';
-        }).join("");
-        return '<div class="q" role="group" aria-labelledby="' + id + '-l"><span class="q-label" id="' + id + '-l">' + esc(q.label) + '</span><div class="opts">' + opts + '</div></div>';
+        }
+        var list = optionsFor(q);
+        var grouped = list.some(function (o) { return o.children; });
+        var body = grouped
+          ? '<div class="opt-groups">' + list.map(function (o) {
+              return '<div class="opt-group"><span class="opt-group-label">' + esc(o.label) + '</span><div class="opts">' + (o.children || [o]).map(optHtml).join("") + '</div></div>';
+            }).join("") + '</div>'
+          : '<div class="opts">' + list.map(optHtml).join("") + '</div>';
+        return '<div class="q" role="group" aria-labelledby="' + id + '-l"><span class="q-label" id="' + id + '-l">' + esc(q.label) + '</span>' + body + '</div>';
       }).join("");
       return '<fieldset class="section" id="sec-' + s.id + '"><legend><div class="sec-head"><span class="sec-num">' +
         String(i + 1).padStart(2, "0") + '</span><h2>' + esc(s.title) + '<span class="sec-kind">' + kind + '</span></h2>' +
@@ -311,6 +351,59 @@ textarea.fallback { width: 100%; min-height: 160px; font: 12px/1.5 var(--mono); 
       else if (el.dataset.type === "multi") el.checked = Array.isArray(v) && v.indexOf(el.value) >= 0;
       else el.checked = v === el.value;
     });
+  }
+
+  function setupViews() {
+    var tabs = document.querySelectorAll(".view-tab");
+    function show(view) {
+      tabs.forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.view === view)); });
+      document.getElementById("view-planner").hidden = view !== "planner";
+      document.getElementById("view-taxonomy").hidden = view !== "taxonomy";
+    }
+    tabs.forEach(function (t) { t.addEventListener("click", function () { show(t.dataset.view); }); });
+    if (location.hash === "#taxonomy") show("taxonomy");
+  }
+
+  var CATALOG_NOTE = { partial: "Catalog partly covers this", not_populated: "Not in the method catalog yet" };
+
+  function buildReference() {
+    var nodes = PlannerEngine.indexTaxonomy(taxonomy);
+    var qLabel = {};
+    taxonomy.sections.forEach(function (s) { s.questions.forEach(function (q) { qLabel[q.id] = s.title + " › " + q.label; }); });
+
+    function tree(options) {
+      return '<ul>' + options.map(function (o) {
+        return '<li><span class="cat-name">' + esc(o.label) + '</span><span class="cat-id">' + esc(o.value) + '</span>' +
+          (o.catalog ? ' <span class="pill maturing">' + CATALOG_NOTE[o.catalog] + '</span>' : '') +
+          (o.definition ? '<p class="cat-def">' + esc(o.definition) + '</p>' : (o.hint ? '<p class="cat-def">' + esc(o.hint) + '</p>' : '')) +
+          (o.examples && o.examples.length ? '<p class="cat-ex">Examples: ' + o.examples.map(esc).join("; ") + '</p>' : '') +
+          (o.note ? '<p class="cat-note">' + esc(o.note) + '</p>' : '') +
+          (o.children ? tree(o.children) : '') + '</li>';
+      }).join("") + '</ul>';
+    }
+    function cond(c) {
+      return Object.keys(c).map(function (k) {
+        return (qLabel[k] || k) + ": " + c[k].map(function (v) { return v === true ? "yes" : nodes[v] ? nodes[v].label : v; }).join(" or ");
+      }).join(" and ");
+    }
+
+    var out = ['<p class="ref-intro">' + esc(taxonomy.structure_note) + '</p>'];
+    var n = 0;
+    taxonomy.sections.forEach(function (s) {
+      if (s.kind !== "taxonomy") return;
+      n++;
+      out.push('<section class="panel" id="ref-' + s.id + '"><div class="sec-head"><span class="sec-num">R' + n + '</span><h2>' + esc(s.title) + '</h2><p class="sec-help">' + esc(s.help) + '</p></div>' +
+        s.questions.filter(function (q) { return q.options; }).map(function (q) {
+          return '<div><h3>' + esc(q.label) + '</h3><div class="tree">' + tree(q.options) + '</div></div>';
+        }).join("") + '</section>');
+    });
+    out.push('<section class="panel" id="ref-checks"><h2>Where rankings depend on each other</h2>' +
+      '<p class="sub">Each check below is a place where one ranking constrains another. The planner flags a project that breaks one. If many checks pile up around one ranking, that part may work better as a strict hierarchy.</p><ul class="checks">' +
+      taxonomy.consistency_checks.map(function (c) {
+        return '<li><span class="rule-line">If ' + esc(cond(c.when)) + '<br>then expect ' + esc(cond(c.expect)) + '</span><span class="detail">' + esc(c.text) + '</span></li>';
+      }).join("") + '</ul></section>');
+    out.push('<p class="footnote">Taxonomy version ' + esc(taxonomy.version) + '. ' + esc(taxonomy.source) + '</p>');
+    document.getElementById("view-taxonomy").innerHTML = out.join("");
   }
 
   var SEVERITY = { block: "Blocker", rnd: "R&D", warn: "Check", info: "Note" };

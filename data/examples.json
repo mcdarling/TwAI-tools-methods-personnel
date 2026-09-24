@@ -11,18 +11,32 @@
         "intended_use_documented": true,
         "operating_domain_documented": false,
         "shift_expected": true,
+        "domain": "structural_health",
         "decision_context": "Aircraft component health",
+        "decision_type": "monitoring",
         "domain_expertise": "Acoustic emission / NDE, composite materials",
         "question": "Does AE data show that a component is damaged?",
+        "problem_type": "classification",
         "claim": "association",
-        "inputs": ["continuous", "ordinal", "categorical"],
-        "output": "categorical",
+        "inputs": [
+          "continuous",
+          "ordinal",
+          "categorical"
+        ],
+        "output": "multiclass",
         "learning": "supervised",
         "representation": "empirical",
+        "data_regime": "data_moderate",
         "semantics": "diagnostic",
-        "constraints": ["encoding"],
+        "constraints": [
+          "encoding"
+        ],
         "algorithm": "tree_ensemble",
-        "roles": ["ml_engineer", "data_engineer", "domain_sme"]
+        "roles": [
+          "ml_engineer",
+          "data_engineer",
+          "domain_sme"
+        ]
       }
     },
     {
@@ -36,18 +50,30 @@
         "intended_use_documented": true,
         "operating_domain_documented": true,
         "shift_expected": false,
+        "domain": "earth_systems",
         "decision_context": "Climate-model development",
+        "decision_type": "screening",
         "domain_expertise": "Arctic sea ice, Earth system modeling",
         "question": "Which summer variables are most influential for September sea-ice extent in E3SM versus observations?",
+        "problem_type": "regression",
         "claim": "association",
-        "inputs": ["continuous"],
-        "output": "continuous",
+        "inputs": [
+          "continuous"
+        ],
+        "output": "scalar",
         "learning": "supervised",
         "representation": "empirical",
+        "data_regime": "data_scarce",
         "semantics": "diagnostic",
-        "constraints": ["feature_engineering"],
+        "constraints": [
+          "feature_engineering"
+        ],
         "algorithm": "tree_ensemble",
-        "roles": ["ml_engineer", "domain_sme", "statistician"]
+        "roles": [
+          "ml_engineer",
+          "domain_sme",
+          "statistician"
+        ]
       }
     },
     {
@@ -61,18 +87,30 @@
         "intended_use_documented": true,
         "operating_domain_documented": true,
         "shift_expected": true,
+        "domain": "earth_systems",
         "decision_context": "Climate-model development",
+        "decision_type": "design",
         "domain_expertise": "Arctic sea ice, Earth system modeling",
         "question": "Which summer drivers cause September sea-ice decline?",
+        "problem_type": "regression",
         "claim": "intervention",
-        "inputs": ["continuous"],
-        "output": "continuous",
+        "inputs": [
+          "continuous"
+        ],
+        "output": "scalar",
         "learning": "supervised",
         "representation": "empirical",
+        "data_regime": "data_scarce",
         "semantics": "diagnostic",
-        "constraints": ["feature_engineering"],
+        "constraints": [
+          "feature_engineering"
+        ],
         "algorithm": "tree_ensemble",
-        "roles": ["ml_engineer", "domain_sme", "statistician"]
+        "roles": [
+          "ml_engineer",
+          "domain_sme",
+          "statistician"
+        ]
       }
     },
     {
@@ -86,18 +124,31 @@
         "intended_use_documented": true,
         "operating_domain_documented": true,
         "shift_expected": true,
+        "domain": "structural_health",
         "decision_context": "Aircraft component health",
+        "decision_type": "monitoring",
         "domain_expertise": "Acoustic emission / NDE, elastic wave propagation in composites",
         "question": "Where is damage located and what type is it?",
+        "problem_type": "classification",
         "claim": "association",
-        "inputs": ["waveform", "continuous"],
-        "output": "categorical",
+        "inputs": [
+          "waveform",
+          "continuous"
+        ],
+        "output": "multiclass",
         "learning": "supervised",
-        "representation": "hybrid",
+        "representation": "physics_informed",
+        "data_regime": "data_scarce",
         "semantics": "diagnostic",
-        "constraints": ["physics_regularization"],
+        "constraints": [
+          "physics_regularization"
+        ],
         "algorithm": "pinn",
-        "roles": ["ml_engineer", "domain_sme", "sciml"]
+        "roles": [
+          "ml_engineer",
+          "domain_sme",
+          "sciml"
+        ]
       }
     }
   ]

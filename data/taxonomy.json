@@ -1,147 +1,1364 @@
 {
-  "source": "Acquesta, Darling & Nichol, 'Towards Certifying Trustworthy Machine Learning Models for Acoustic Signal Classification' (ASA, May 2026), slide 10. Option lists are provisional.",
+  "version": "0.2-draft",
+  "source": "Rankings from Acquesta, Darling & Nichol, 'Towards Certifying Trustworthy Machine Learning Models for Acoustic Signal Classification' (ASA, May 2026), slide 10. Categories, definitions, and consistency checks are a draft for co-author review.",
+  "structure_note": "Rankings are independent facets: a project's position is the combination of its answers. Categories inside a ranking can have sub-levels; only leaf categories are selectable, and a method or rule that names a parent applies to all of its children. Where one ranking's answer genuinely constrains another's, the constraint is written as a consistency check below. Those checks are the evidence for deciding whether any part of the taxonomy should become a strict hierarchy.",
   "sections": [
     {
-      "id": "context", "title": "Application context", "kind": "gcmm",
+      "id": "context",
+      "title": "Application context",
+      "kind": "gcmm",
       "help": "GCMM ties every credibility claim to an intended use, a consequence level, and an operating domain.",
       "questions": [
-        { "id": "intended_use", "type": "text", "label": "Intended use", "placeholder": "What decision or analysis will the model's output feed?" },
-        { "id": "consequence", "type": "single", "label": "Consequence of a wrong answer",
+        {
+          "id": "intended_use",
+          "type": "text",
+          "label": "Intended use",
+          "placeholder": "What decision or analysis will the model's output feed?"
+        },
+        {
+          "id": "consequence",
+          "type": "single",
+          "label": "Consequence of a wrong answer",
           "options": [
-            { "value": "low", "label": "Low", "hint": "Exploratory; little impact if wrong" },
-            { "value": "moderate", "label": "Moderate", "hint": "Could misdirect work, but no direct safety or policy effect" },
-            { "value": "high", "label": "High", "hint": "Informs high-consequence decisions" },
-            { "value": "critical", "label": "Critical", "hint": "High consequence and directly drives critical decisions" }
-          ] },
-        { "id": "deployment", "type": "single", "label": "How will the model be used?",
+            {
+              "value": "low",
+              "label": "Low",
+              "hint": "Exploratory; little impact if wrong"
+            },
+            {
+              "value": "moderate",
+              "label": "Moderate",
+              "hint": "Could misdirect work, but no direct safety or policy effect"
+            },
+            {
+              "value": "high",
+              "label": "High",
+              "hint": "Informs high-consequence decisions"
+            },
+            {
+              "value": "critical",
+              "label": "Critical",
+              "hint": "High consequence and directly drives critical decisions"
+            }
+          ]
+        },
+        {
+          "id": "deployment",
+          "type": "single",
+          "label": "How will the model be used?",
           "options": [
-            { "value": "analysis", "label": "One-off analysis or research study" },
-            { "value": "decision_support", "label": "Decision support with a human reviewing outputs" },
-            { "value": "operational", "label": "Operational system, run repeatedly" },
-            { "value": "autonomous", "label": "Acts without a human in the loop" }
-          ] },
-        { "id": "intended_use_documented", "type": "bool", "label": "The intended use is written down and agreed" },
-        { "id": "operating_domain_documented", "type": "bool", "label": "The operating domain (conditions, ranges, populations) is written down" },
-        { "id": "shift_expected", "type": "bool", "label": "Operating conditions are expected to differ from the training data" }
+            {
+              "value": "analysis",
+              "label": "One-off analysis or research study"
+            },
+            {
+              "value": "decision_support",
+              "label": "Decision support with a human reviewing outputs"
+            },
+            {
+              "value": "operational",
+              "label": "Operational system, run repeatedly"
+            },
+            {
+              "value": "autonomous",
+              "label": "Acts without a human in the loop"
+            }
+          ]
+        },
+        {
+          "id": "intended_use_documented",
+          "type": "bool",
+          "label": "The intended use is written down and agreed"
+        },
+        {
+          "id": "operating_domain_documented",
+          "type": "bool",
+          "label": "The operating domain (conditions, ranges, populations) is written down"
+        },
+        {
+          "id": "shift_expected",
+          "type": "bool",
+          "label": "Operating conditions are expected to differ from the training data"
+        }
       ]
     },
     {
-      "id": "decision", "title": "Decision context", "kind": "taxonomy",
-      "help": "The mission or domain the model supports.",
+      "id": "decision",
+      "title": "Decision context",
+      "kind": "taxonomy",
+      "help": "The mission area the model serves and the kind of decision it informs. Sets which domain experts are needed.",
       "questions": [
-        { "id": "decision_context", "type": "text", "label": "Decision context", "placeholder": "e.g. Aircraft component health" },
-        { "id": "domain_expertise", "type": "text", "label": "Domain expertise needed", "placeholder": "e.g. Acoustic emission / NDE, composites" }
+        {
+          "id": "domain",
+          "type": "single",
+          "label": "Mission domain",
+          "options": [
+            {
+              "value": "structural_health",
+              "label": "Structural health & NDE",
+              "definition": "Detecting, locating, or characterizing damage and degradation in engineered structures and components.",
+              "examples": [
+                "Acoustic-emission damage classification",
+                "Ultrasonic flaw detection",
+                "Vibration-based monitoring"
+              ]
+            },
+            {
+              "value": "earth_systems",
+              "label": "Climate & Earth systems",
+              "definition": "Understanding or predicting atmosphere, ocean, cryosphere, land, and coupled Earth-system behavior.",
+              "examples": [
+                "E3SM sea-ice feature analysis",
+                "Downscaling",
+                "Extreme-event attribution"
+              ]
+            },
+            {
+              "value": "materials_manufacturing",
+              "label": "Materials & manufacturing",
+              "definition": "Predicting material properties or behavior, and controlling or qualifying manufacturing processes.",
+              "examples": [
+                "Additive-manufacturing defect prediction",
+                "Property surrogates"
+              ]
+            },
+            {
+              "value": "energy_systems",
+              "label": "Energy systems",
+              "definition": "Generation, grid, storage, and fuel-cycle systems.",
+              "examples": [
+                "Grid load forecasting",
+                "Battery health estimation"
+              ]
+            },
+            {
+              "value": "nuclear_security",
+              "label": "Nuclear & national security",
+              "definition": "Stockpile, nonproliferation, treaty verification, and threat detection missions.",
+              "examples": [
+                "Radiation-source identification",
+                "Seismic event discrimination"
+              ]
+            },
+            {
+              "value": "bio_health",
+              "label": "Biology & health",
+              "definition": "Biological systems, biosecurity, and medical or public-health decisions.",
+              "examples": [
+                "Pathogen detection",
+                "Epidemic forecasting"
+              ]
+            },
+            {
+              "value": "cyber_info",
+              "label": "Cyber & information systems",
+              "definition": "Networks, software, and information environments.",
+              "examples": [
+                "Intrusion detection",
+                "Malware classification"
+              ]
+            },
+            {
+              "value": "other_domain",
+              "label": "Other"
+            }
+          ]
+        },
+        {
+          "id": "decision_context",
+          "type": "text",
+          "label": "Decision context",
+          "placeholder": "e.g. Aircraft component health"
+        },
+        {
+          "id": "decision_type",
+          "type": "single",
+          "label": "Kind of decision informed",
+          "options": [
+            {
+              "value": "screening",
+              "label": "Screening / triage",
+              "hint": "Where to look next",
+              "definition": "Output prioritizes attention or generates hypotheses; a person decides what happens next."
+            },
+            {
+              "value": "design",
+              "label": "Design / engineering",
+              "hint": "Choosing among designs",
+              "definition": "Output informs design choices, parameters, or engineering trade-offs."
+            },
+            {
+              "value": "qualification",
+              "label": "Qualification / certification",
+              "hint": "Accept or reject",
+              "definition": "Output supports a formal accept/reject or certification decision about a system or component."
+            },
+            {
+              "value": "monitoring",
+              "label": "Operational monitoring",
+              "hint": "Ongoing status",
+              "definition": "Output tracks the ongoing state of a system and triggers action when it changes."
+            },
+            {
+              "value": "policy",
+              "label": "Policy / planning",
+              "hint": "Strategy and resources",
+              "definition": "Output informs policy, strategy, or resource allocation."
+            }
+          ]
+        },
+        {
+          "id": "domain_expertise",
+          "type": "text",
+          "label": "Domain expertise needed",
+          "placeholder": "e.g. Acoustic emission / NDE, composites"
+        }
       ]
     },
     {
-      "id": "solution", "title": "Solution space", "kind": "taxonomy",
-      "help": "Question → problem → phenomena. The kind of claim you want to make sets how much structural evidence you need.",
+      "id": "solution",
+      "title": "Solution space",
+      "kind": "taxonomy",
+      "help": "Question → problem → phenomena. What the model is asked to do, and what kind of claim its answers will support.",
       "questions": [
-        { "id": "question", "type": "text", "label": "Question the model answers", "placeholder": "e.g. Does AE data show that a component is damaged?" },
-        { "id": "claim", "type": "single", "label": "Kind of claim",
+        {
+          "id": "question",
+          "type": "text",
+          "label": "Question the model answers",
+          "placeholder": "e.g. Does AE data show that a component is damaged?"
+        },
+        {
+          "id": "problem_type",
+          "type": "single",
+          "label": "Problem type",
           "options": [
-            { "value": "association", "label": "Association", "hint": "Predict or classify from observations" },
-            { "value": "intervention", "label": "Intervention", "hint": "Reason about what happens if we act" },
-            { "value": "counterfactual", "label": "Counterfactual", "hint": "Reason about what would have happened" }
-          ] }
+            {
+              "value": "estimation",
+              "label": "Estimation",
+              "children": [
+                {
+                  "value": "classification",
+                  "label": "Classification",
+                  "definition": "Assign each case to one of a fixed set of classes.",
+                  "examples": [
+                    "Damage type from AE features"
+                  ]
+                },
+                {
+                  "value": "regression",
+                  "label": "Regression",
+                  "definition": "Estimate a continuous quantity for each case.",
+                  "examples": [
+                    "September sea-ice extent from summer variables"
+                  ]
+                },
+                {
+                  "value": "detection",
+                  "label": "Detection / anomaly",
+                  "definition": "Decide whether an event, object, or departure from normal is present.",
+                  "examples": [
+                    "Novel damage onset",
+                    "Intrusion alerts"
+                  ]
+                },
+                {
+                  "value": "localization",
+                  "label": "Localization",
+                  "definition": "Estimate where something is in space or time.",
+                  "examples": [
+                    "AE source location"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "dynamics",
+              "label": "Dynamics",
+              "children": [
+                {
+                  "value": "forecast",
+                  "label": "Forecasting",
+                  "definition": "Predict future states of a time-evolving system.",
+                  "examples": [
+                    "Load forecasting"
+                  ]
+                },
+                {
+                  "value": "surrogate",
+                  "label": "Surrogate / emulation",
+                  "definition": "Replace an expensive simulation or experiment with a fast approximation.",
+                  "examples": [
+                    "Emulating a finite-element model"
+                  ]
+                },
+                {
+                  "value": "inverse",
+                  "label": "Inverse problem / parameter estimation",
+                  "definition": "Infer causes, parameters, or inputs from observed effects.",
+                  "examples": [
+                    "Material properties from wave arrivals"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "action",
+              "label": "Action",
+              "children": [
+                {
+                  "value": "control",
+                  "label": "Control / optimization",
+                  "definition": "Choose actions or designs that optimize an objective.",
+                  "examples": [
+                    "Process control",
+                    "Design optimization"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "discovery",
+              "label": "Discovery",
+              "children": [
+                {
+                  "value": "structure_discovery",
+                  "label": "Structure discovery",
+                  "definition": "Find groups, modes, or relationships without labeled targets.",
+                  "examples": [
+                    "Clustering AE hits into source mechanisms"
+                  ]
+                },
+                {
+                  "value": "generation",
+                  "label": "Generation",
+                  "definition": "Produce new content: text, images, designs, or synthetic data.",
+                  "examples": [
+                    "Report drafting",
+                    "Synthetic signal generation"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "claim",
+          "type": "single",
+          "label": "Kind of claim",
+          "options": [
+            {
+              "value": "association",
+              "label": "Association",
+              "hint": "Predict or classify from observations",
+              "definition": "Rung 1 of the causal ladder. Supports prediction under the conditions the data came from; says nothing about what happens if something is changed."
+            },
+            {
+              "value": "intervention",
+              "label": "Intervention",
+              "hint": "Reason about what happens if we act",
+              "definition": "Rung 2. Supports reasoning about the effect of actions. Needs causal or structural assumptions beyond observational data."
+            },
+            {
+              "value": "counterfactual",
+              "label": "Counterfactual",
+              "hint": "Reason about what would have happened",
+              "definition": "Rung 3. Supports reasoning about alternative histories for a specific case. Needs a structural causal model."
+            }
+          ]
+        }
       ]
     },
     {
-      "id": "mappings", "title": "Space of mappings", "kind": "taxonomy",
-      "help": "Domain and range of the map the model learns.",
+      "id": "mappings",
+      "title": "Space of mappings",
+      "kind": "taxonomy",
+      "help": "The domain and range of the map the model learns or computes, and how it learns it.",
       "questions": [
-        { "id": "inputs", "type": "multi", "label": "Input data types (domain)",
+        {
+          "id": "inputs",
+          "type": "multi",
+          "label": "Input data types (domain)",
           "options": [
-            { "value": "continuous", "label": "Continuous" },
-            { "value": "ordinal", "label": "Ordinal" },
-            { "value": "categorical", "label": "Categorical" },
-            { "value": "time_series", "label": "Time series" },
-            { "value": "waveform", "label": "Raw waveform / signal" },
-            { "value": "image", "label": "Image" },
-            { "value": "spatial_field", "label": "Spatial field / mesh" },
-            { "value": "text", "label": "Text" }
-          ] },
-        { "id": "output", "type": "single", "label": "Output type (range)",
+            {
+              "value": "tabular",
+              "label": "Tabular",
+              "children": [
+                {
+                  "value": "continuous",
+                  "label": "Continuous",
+                  "definition": "Real-valued measurements.",
+                  "examples": [
+                    "Peak amplitude",
+                    "Temperature"
+                  ]
+                },
+                {
+                  "value": "ordinal",
+                  "label": "Ordinal",
+                  "definition": "Ordered categories without a meaningful distance.",
+                  "examples": [
+                    "Load level: low / medium / high"
+                  ]
+                },
+                {
+                  "value": "categorical",
+                  "label": "Categorical",
+                  "definition": "Unordered categories.",
+                  "examples": [
+                    "Fiber type",
+                    "Resin type"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "sequential",
+              "label": "Sequential",
+              "children": [
+                {
+                  "value": "time_series",
+                  "label": "Time series",
+                  "definition": "Regularly sampled measurements over time, usually at low to moderate rates.",
+                  "examples": [
+                    "Monthly climate averages",
+                    "Sensor logs"
+                  ]
+                },
+                {
+                  "value": "waveform",
+                  "label": "Raw waveform / signal",
+                  "definition": "High-rate sampled signals analyzed directly rather than through extracted features.",
+                  "examples": [
+                    "AE waveforms",
+                    "Seismograms",
+                    "Audio"
+                  ]
+                },
+                {
+                  "value": "event_sequence",
+                  "label": "Event sequence",
+                  "definition": "Irregular, timestamped discrete events.",
+                  "examples": [
+                    "AE hit trains",
+                    "Network logs"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "spatial",
+              "label": "Spatial",
+              "children": [
+                {
+                  "value": "image",
+                  "label": "Image",
+                  "definition": "Regular 2-D or 3-D pixel or voxel grids.",
+                  "examples": [
+                    "CT scans",
+                    "Micrographs"
+                  ]
+                },
+                {
+                  "value": "spatial_field",
+                  "label": "Spatial field / mesh",
+                  "definition": "Physical fields on structured or unstructured meshes.",
+                  "examples": [
+                    "Simulation output",
+                    "Gridded climate fields"
+                  ]
+                },
+                {
+                  "value": "point_cloud",
+                  "label": "Point cloud",
+                  "definition": "Unordered sets of points in space.",
+                  "examples": [
+                    "Lidar scans"
+                  ],
+                  "catalog": "partial"
+                }
+              ]
+            },
+            {
+              "value": "relational",
+              "label": "Relational",
+              "children": [
+                {
+                  "value": "graph",
+                  "label": "Graph / network",
+                  "definition": "Entities and the relations between them.",
+                  "examples": [
+                    "Sensor networks",
+                    "Molecular graphs"
+                  ],
+                  "catalog": "partial"
+                }
+              ]
+            },
+            {
+              "value": "language",
+              "label": "Language",
+              "children": [
+                {
+                  "value": "text",
+                  "label": "Text",
+                  "definition": "Natural-language documents or records.",
+                  "examples": [
+                    "Inspection reports"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "output",
+          "type": "single",
+          "label": "Output type (range)",
           "options": [
-            { "value": "categorical", "label": "Categorical (classification)" },
-            { "value": "continuous", "label": "Continuous (regression)" },
-            { "value": "structured", "label": "Structured (field, sequence, graph)" },
-            { "value": "generated", "label": "Generated content (text, images)" }
-          ] },
-        { "id": "learning", "type": "single", "label": "Learning setting",
+            {
+              "value": "class_output",
+              "label": "Categorical",
+              "children": [
+                {
+                  "value": "binary",
+                  "label": "Binary",
+                  "definition": "Two classes.",
+                  "examples": [
+                    "Damaged / undamaged"
+                  ]
+                },
+                {
+                  "value": "multiclass",
+                  "label": "Multiclass",
+                  "definition": "One of three or more exclusive classes.",
+                  "examples": [
+                    "No damage / matrix cracking / fiber breakage / delamination"
+                  ]
+                },
+                {
+                  "value": "multilabel",
+                  "label": "Multilabel",
+                  "definition": "Any subset of a set of labels.",
+                  "examples": [
+                    "Co-occurring damage modes"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "real_output",
+              "label": "Continuous",
+              "children": [
+                {
+                  "value": "scalar",
+                  "label": "Scalar",
+                  "definition": "One real-valued output.",
+                  "examples": [
+                    "Sea-ice extent"
+                  ]
+                },
+                {
+                  "value": "multivariate",
+                  "label": "Multivariate",
+                  "definition": "A fixed-length vector of real-valued outputs.",
+                  "examples": [
+                    "Source coordinates"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "structured_output",
+              "label": "Structured",
+              "children": [
+                {
+                  "value": "field_output",
+                  "label": "Field",
+                  "definition": "A spatial or spatio-temporal field.",
+                  "examples": [
+                    "Predicted stress field"
+                  ]
+                },
+                {
+                  "value": "sequence_output",
+                  "label": "Sequence",
+                  "definition": "A variable-length ordered output.",
+                  "examples": [
+                    "Forecast trajectory"
+                  ]
+                },
+                {
+                  "value": "graph_output",
+                  "label": "Set or graph",
+                  "definition": "A set, graph, or other combinatorial object.",
+                  "examples": [
+                    "Crack network"
+                  ],
+                  "catalog": "partial"
+                }
+              ]
+            },
+            {
+              "value": "generated_output",
+              "label": "Generated content",
+              "children": [
+                {
+                  "value": "generated_text",
+                  "label": "Text",
+                  "definition": "Free-form natural language.",
+                  "examples": [
+                    "Draft inspection summaries"
+                  ]
+                },
+                {
+                  "value": "generated_media",
+                  "label": "Images, signals, or designs",
+                  "definition": "Synthetic images, signals, or design candidates.",
+                  "examples": [
+                    "Synthetic AE waveforms"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "learning",
+          "type": "single",
+          "label": "Learning setting",
           "options": [
-            { "value": "supervised", "label": "Supervised" },
-            { "value": "unsupervised", "label": "Unsupervised" },
-            { "value": "reinforcement", "label": "Reinforcement" },
-            { "value": "generative", "label": "Generative" }
-          ] }
+            {
+              "value": "none",
+              "label": "No learning",
+              "hint": "Model is specified, not trained",
+              "definition": "The model is derived from theory and calibrated, not trained on data."
+            },
+            {
+              "value": "supervised",
+              "label": "Supervised",
+              "definition": "Learns from inputs paired with known targets."
+            },
+            {
+              "value": "self_supervised",
+              "label": "Self- or semi-supervised",
+              "definition": "Learns representations from unlabeled data, often fine-tuned with a few labels.",
+              "catalog": "partial"
+            },
+            {
+              "value": "unsupervised",
+              "label": "Unsupervised",
+              "definition": "Finds structure without targets."
+            },
+            {
+              "value": "reinforcement",
+              "label": "Reinforcement",
+              "definition": "Learns a policy from rewards by interacting with an environment."
+            },
+            {
+              "value": "generative",
+              "label": "Generative",
+              "definition": "Learns a data distribution in order to produce new samples."
+            }
+          ]
+        }
       ]
     },
     {
-      "id": "representation", "title": "Numerical representation", "kind": "taxonomy",
-      "help": "How much explicit, implicit, and empirical knowledge the model carries.",
+      "id": "representation",
+      "title": "Numerical representation",
+      "kind": "taxonomy",
+      "help": "Where the model's knowledge comes from: explicit (governing equations), implicit (encoded structure such as symmetries or priors), and empirical (data).",
       "questions": [
-        { "id": "representation", "type": "single", "label": "Knowledge in the model",
+        {
+          "id": "representation",
+          "type": "single",
+          "label": "Knowledge in the model",
           "options": [
-            { "value": "empirical", "label": "Empirical only", "hint": "Learned from data, no encoded physics" },
-            { "value": "hybrid", "label": "Hybrid", "hint": "First-principles structure plus learned components" },
-            { "value": "mechanistic", "label": "Explicit mechanistic", "hint": "Governing equations; data used to calibrate and validate" }
-          ] }
+            {
+              "value": "data_driven",
+              "label": "Data-driven",
+              "children": [
+                {
+                  "value": "empirical",
+                  "label": "Empirical only",
+                  "hint": "Learned from data; no encoded physics",
+                  "definition": "All knowledge comes from data. No explicit or implicit physical knowledge is built in.",
+                  "examples": [
+                    "Random forest on AE features"
+                  ]
+                },
+                {
+                  "value": "empirical_priors",
+                  "label": "Empirical with encoded structure",
+                  "hint": "Priors, symmetries, or shape constraints",
+                  "definition": "Learned from data, with implicit knowledge built in: priors, symmetry or invariance, monotonicity, or architecture chosen to match the physics.",
+                  "examples": [
+                    "Rotation-equivariant CNN",
+                    "Monotone gradient boosting"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "hybrid",
+              "label": "Hybrid",
+              "children": [
+                {
+                  "value": "physics_informed",
+                  "label": "Physics-informed learning",
+                  "hint": "Governing equations in the loss",
+                  "definition": "A learned model trained to satisfy governing equations as soft or hard constraints.",
+                  "examples": [
+                    "PINN for wave propagation"
+                  ]
+                },
+                {
+                  "value": "embedded_ml",
+                  "label": "ML embedded in a simulator",
+                  "hint": "Learned closures or sub-models",
+                  "definition": "A mechanistic simulator with one or more learned components, such as closures or sub-grid models.",
+                  "examples": [
+                    "Learned turbulence closure"
+                  ],
+                  "catalog": "partial"
+                },
+                {
+                  "value": "simulator_surrogate",
+                  "label": "Surrogate of a simulator",
+                  "hint": "Trained on simulation output",
+                  "definition": "A learned model trained on simulation output to stand in for the simulator.",
+                  "examples": [
+                    "Neural-operator emulator of a finite-element model"
+                  ]
+                },
+                {
+                  "value": "grey_box",
+                  "label": "Grey-box / residual model",
+                  "hint": "Physics model plus learned correction",
+                  "definition": "A mechanistic model plus a learned correction for its residual error.",
+                  "examples": [
+                    "Physics-based wave arrival model with learned correction"
+                  ],
+                  "catalog": "partial"
+                }
+              ]
+            },
+            {
+              "value": "mechanistic_group",
+              "label": "Mechanistic",
+              "children": [
+                {
+                  "value": "mechanistic",
+                  "label": "Explicit mechanistic",
+                  "hint": "Governing equations; data for calibration and validation",
+                  "definition": "Knowledge is explicit in governing equations. Data is used only to calibrate and validate.",
+                  "examples": [
+                    "Finite-element model",
+                    "Earth system model"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "data_regime",
+          "type": "single",
+          "label": "Data available for training and validation",
+          "options": [
+            {
+              "value": "data_scarce",
+              "label": "Scarce",
+              "hint": "Tens to hundreds of independent cases",
+              "definition": "Few independent cases, as is typical of expensive experiments or rare events. Limits held-out validation and calibration."
+            },
+            {
+              "value": "data_moderate",
+              "label": "Moderate",
+              "hint": "Hundreds to tens of thousands"
+            },
+            {
+              "value": "data_abundant",
+              "label": "Abundant",
+              "hint": "Enough to hold out large test sets"
+            }
+          ]
+        }
       ]
     },
     {
-      "id": "semantics", "title": "Semantics", "kind": "taxonomy",
-      "help": "How the model's results are interpreted.",
+      "id": "semantics",
+      "title": "Semantics",
+      "kind": "taxonomy",
+      "help": "How the model's results are interpreted by the people who use them.",
       "questions": [
-        { "id": "semantics", "type": "single", "label": "Interpretation of results",
+        {
+          "id": "semantics",
+          "type": "single",
+          "label": "Interpretation of results",
           "options": [
-            { "value": "descriptive", "label": "Descriptive" },
-            { "value": "diagnostic", "label": "Diagnostic" },
-            { "value": "predictive", "label": "Predictive" },
-            { "value": "forecasting", "label": "Forecasting" },
-            { "value": "prescriptive", "label": "Prescriptive" }
-          ] }
+            {
+              "value": "descriptive",
+              "label": "Descriptive",
+              "hint": "What happened",
+              "definition": "Summarizes or characterizes observed data without inferring hidden states.",
+              "note": "The ASA deck labels the AE example descriptive; the GCMM paper would call a damage classifier diagnostic, since it infers an unobserved state."
+            },
+            {
+              "value": "diagnostic",
+              "label": "Diagnostic",
+              "hint": "What state is it in, or why",
+              "definition": "Infers an unobserved current state or its likely cause from observations.",
+              "examples": [
+                "Damage type from AE",
+                "E3SM driver screening"
+              ]
+            },
+            {
+              "value": "predictive",
+              "label": "Predictive",
+              "hint": "What will it be for a new case",
+              "definition": "Estimates outcomes for new cases under the same conditions as the training data."
+            },
+            {
+              "value": "forecasting",
+              "label": "Forecasting",
+              "hint": "What will happen next",
+              "definition": "Projects a system's future states forward in time."
+            },
+            {
+              "value": "prescriptive",
+              "label": "Prescriptive",
+              "hint": "What should we do",
+              "definition": "Recommends actions. Implies an interventional claim."
+            }
+          ]
+        }
       ]
     },
     {
-      "id": "constraints", "title": "Phenomena constraints", "kind": "taxonomy",
-      "help": "Known constraints and data handling applied to the phenomena.",
+      "id": "constraints",
+      "title": "Phenomena constraints",
+      "kind": "taxonomy",
+      "help": "What is known about the phenomena and built into the model, plus how the data is handled. The two are grouped separately because only the first encodes knowledge of the phenomena.",
       "questions": [
-        { "id": "constraints", "type": "multi", "label": "Constraints applied",
+        {
+          "id": "constraints",
+          "type": "multi",
+          "label": "Constraints and data handling applied",
           "options": [
-            { "value": "encoding", "label": "Categorical encoding (e.g. one-hot)" },
-            { "value": "feature_engineering", "label": "Feature engineering" },
-            { "value": "dimension_reduction", "label": "Dimension reduction" },
-            { "value": "monotonic", "label": "Monotonicity or shape constraints" },
-            { "value": "invariance", "label": "Symmetry or invariance constraints" },
-            { "value": "physics_regularization", "label": "Physics-based regularization" }
-          ] }
+            {
+              "value": "phenomena_knowledge",
+              "label": "Knowledge of the phenomena",
+              "children": [
+                {
+                  "value": "conservation",
+                  "label": "Conservation laws",
+                  "definition": "Mass, momentum, energy, or charge conservation enforced or checked."
+                },
+                {
+                  "value": "invariance",
+                  "label": "Symmetry or invariance",
+                  "definition": "Invariance or equivariance to translation, rotation, scale, or sensor placement."
+                },
+                {
+                  "value": "monotonic",
+                  "label": "Monotonicity or shape",
+                  "definition": "Known monotone or convex relationships enforced."
+                },
+                {
+                  "value": "boundary_conditions",
+                  "label": "Boundary or initial conditions",
+                  "definition": "Known boundary or initial conditions built into the model."
+                },
+                {
+                  "value": "physics_regularization",
+                  "label": "Physics-based regularization",
+                  "definition": "Governing-equation residuals added as a penalty during training."
+                }
+              ]
+            },
+            {
+              "value": "data_handling",
+              "label": "Data handling",
+              "children": [
+                {
+                  "value": "encoding",
+                  "label": "Categorical encoding",
+                  "definition": "One-hot, ordinal, or target encoding of categorical inputs.",
+                  "note": "Listed as a phenomena constraint on slide 17 of the ASA deck; grouped here as data handling."
+                },
+                {
+                  "value": "normalization",
+                  "label": "Normalization / scaling",
+                  "definition": "Standardizing or rescaling inputs."
+                },
+                {
+                  "value": "feature_engineering",
+                  "label": "Feature engineering",
+                  "definition": "Deriving features from raw data using domain knowledge.",
+                  "examples": [
+                    "AE rise time, energy, duration"
+                  ]
+                },
+                {
+                  "value": "dimension_reduction",
+                  "label": "Dimension reduction",
+                  "definition": "PCA, autoencoders, or feature selection before modeling."
+                },
+                {
+                  "value": "filtering",
+                  "label": "Filtering / resampling",
+                  "definition": "Signal filtering, windowing, or resampling."
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
-      "id": "architecture", "title": "Architecture / algorithm", "kind": "taxonomy",
-      "help": "The model family you use or propose.",
+      "id": "architecture",
+      "title": "Architecture / algorithm",
+      "kind": "taxonomy",
+      "help": "The model family you use or propose. Top levels span computational tools broadly; detailed sub-categories exist only for ML.",
       "questions": [
-        { "id": "algorithm", "type": "single", "label": "Model family",
+        {
+          "id": "algorithm",
+          "type": "single",
+          "label": "Model family",
           "options": [
-            { "value": "linear", "label": "Linear / GLM" },
-            { "value": "tree_ensemble", "label": "Tree ensemble (random forest, boosting)" },
-            { "value": "kernel", "label": "Kernel method (SVM)" },
-            { "value": "gp", "label": "Gaussian process" },
-            { "value": "mlp", "label": "Feed-forward neural network" },
-            { "value": "cnn", "label": "Convolutional neural network" },
-            { "value": "sequence", "label": "Recurrent / transformer sequence model" },
-            { "value": "pinn", "label": "Physics-informed neural network" },
-            { "value": "foundation", "label": "Foundation model / LLM" }
-          ] }
+            {
+              "value": "mechanistic_sim",
+              "label": "Mechanistic simulation",
+              "catalog": "not_populated",
+              "children": [
+                {
+                  "value": "pde_solver",
+                  "label": "PDE solver",
+                  "definition": "Numerical solution of partial differential equations (FEM, FV, FD, spectral).",
+                  "catalog": "not_populated"
+                },
+                {
+                  "value": "ode_system",
+                  "label": "ODE / lumped system",
+                  "definition": "Ordinary differential equations or lumped-parameter models.",
+                  "catalog": "not_populated"
+                },
+                {
+                  "value": "agent_based",
+                  "label": "Agent-based model",
+                  "definition": "Individual agents with rules whose interactions produce system behavior.",
+                  "catalog": "not_populated"
+                },
+                {
+                  "value": "discrete_event",
+                  "label": "Discrete-event simulation",
+                  "definition": "Systems modeled as sequences of events in time.",
+                  "catalog": "not_populated"
+                }
+              ]
+            },
+            {
+              "value": "statistical",
+              "label": "Statistical model",
+              "children": [
+                {
+                  "value": "linear",
+                  "label": "Linear / GLM",
+                  "definition": "Linear and generalized linear models."
+                },
+                {
+                  "value": "bayesian_hierarchical",
+                  "label": "Bayesian hierarchical model",
+                  "definition": "Probabilistic models with explicit priors and multilevel structure.",
+                  "catalog": "partial"
+                },
+                {
+                  "value": "state_space",
+                  "label": "Time-series / state-space model",
+                  "definition": "ARIMA, Kalman filters, and other state-space models.",
+                  "catalog": "partial"
+                }
+              ]
+            },
+            {
+              "value": "classical_ml",
+              "label": "Classical ML",
+              "children": [
+                {
+                  "value": "tree_ensemble",
+                  "label": "Tree ensemble",
+                  "definition": "Random forests and gradient-boosted trees."
+                },
+                {
+                  "value": "kernel",
+                  "label": "Kernel method",
+                  "definition": "Support vector machines and kernel ridge regression."
+                },
+                {
+                  "value": "gp",
+                  "label": "Gaussian process",
+                  "definition": "Nonparametric Bayesian regression or classification."
+                },
+                {
+                  "value": "knn",
+                  "label": "Nearest neighbors",
+                  "definition": "Prediction from the most similar training cases."
+                },
+                {
+                  "value": "clustering",
+                  "label": "Clustering / mixture model",
+                  "definition": "k-means, Gaussian mixtures, hierarchical and density-based clustering."
+                }
+              ]
+            },
+            {
+              "value": "neural",
+              "label": "Neural network",
+              "children": [
+                {
+                  "value": "mlp",
+                  "label": "Feed-forward (MLP)",
+                  "definition": "Fully connected layers on fixed-length inputs."
+                },
+                {
+                  "value": "cnn",
+                  "label": "Convolutional (CNN)",
+                  "definition": "Convolutions over grids such as signals, images, or fields."
+                },
+                {
+                  "value": "sequence",
+                  "label": "Recurrent / transformer",
+                  "definition": "Sequence models: RNNs, LSTMs, and transformers trained for the task."
+                },
+                {
+                  "value": "gnn",
+                  "label": "Graph neural network",
+                  "definition": "Message passing over graphs.",
+                  "catalog": "partial"
+                },
+                {
+                  "value": "autoencoder",
+                  "label": "Autoencoder",
+                  "definition": "Learns a compressed representation by reconstructing its input."
+                }
+              ]
+            },
+            {
+              "value": "sciml",
+              "label": "Scientific ML",
+              "children": [
+                {
+                  "value": "pinn",
+                  "label": "Physics-informed neural network",
+                  "definition": "Neural network trained with governing-equation residuals in the loss."
+                },
+                {
+                  "value": "neural_operator",
+                  "label": "Neural operator",
+                  "definition": "Learns maps between function spaces (FNO, DeepONet) to emulate PDE solutions.",
+                  "catalog": "partial"
+                }
+              ]
+            },
+            {
+              "value": "generative_family",
+              "label": "Generative / foundation model",
+              "children": [
+                {
+                  "value": "foundation",
+                  "label": "Foundation model / LLM",
+                  "definition": "Large pretrained models used directly, prompted, or fine-tuned."
+                },
+                {
+                  "value": "diffusion",
+                  "label": "Diffusion model",
+                  "definition": "Generates samples by iterative denoising.",
+                  "catalog": "partial"
+                },
+                {
+                  "value": "vae_gan",
+                  "label": "VAE / GAN",
+                  "definition": "Variational autoencoders and generative adversarial networks.",
+                  "catalog": "partial"
+                }
+              ]
+            },
+            {
+              "value": "rl_family",
+              "label": "Reinforcement learning",
+              "children": [
+                {
+                  "value": "rl_policy",
+                  "label": "RL policy",
+                  "definition": "Policy or value-function learning (DQN, PPO, and similar).",
+                  "catalog": "partial"
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
-      "id": "team", "title": "Your team", "kind": "team",
+      "id": "team",
+      "title": "Your team",
+      "kind": "team",
       "help": "Check the roles you already have. Anything recommended but unchecked is reported as a staffing gap.",
       "questions": [
-        { "id": "roles", "type": "multi", "label": "Roles on the team", "options_from": "roles" }
+        {
+          "id": "roles",
+          "type": "multi",
+          "label": "Roles on the team",
+          "options_from": "roles"
+        }
       ]
+    }
+  ],
+  "consistency_checks": [
+    {
+      "id": "classification-output",
+      "when": {
+        "problem_type": [
+          "classification"
+        ]
+      },
+      "expect": {
+        "output": [
+          "class_output"
+        ]
+      },
+      "text": "Classification problems produce categorical outputs. Check the output type under Space of mappings."
+    },
+    {
+      "id": "regression-output",
+      "when": {
+        "problem_type": [
+          "regression"
+        ]
+      },
+      "expect": {
+        "output": [
+          "real_output"
+        ]
+      },
+      "text": "Regression problems produce continuous outputs. Check the output type under Space of mappings."
+    },
+    {
+      "id": "generation-output",
+      "when": {
+        "problem_type": [
+          "generation"
+        ]
+      },
+      "expect": {
+        "output": [
+          "generated_output"
+        ]
+      },
+      "text": "Generation problems produce generated content. Check the output type."
+    },
+    {
+      "id": "generative-output",
+      "when": {
+        "learning": [
+          "generative"
+        ]
+      },
+      "expect": {
+        "output": [
+          "generated_output",
+          "structured_output"
+        ]
+      },
+      "text": "A generative learning setting usually produces generated or structured output. Check the output type."
+    },
+    {
+      "id": "discovery-learning",
+      "when": {
+        "problem_type": [
+          "structure_discovery"
+        ]
+      },
+      "expect": {
+        "learning": [
+          "unsupervised",
+          "self_supervised"
+        ]
+      },
+      "text": "Structure discovery normally uses unsupervised or self-supervised learning. Check the learning setting."
+    },
+    {
+      "id": "control-learning",
+      "when": {
+        "problem_type": [
+          "control"
+        ]
+      },
+      "expect": {
+        "semantics": [
+          "prescriptive"
+        ]
+      },
+      "text": "Control and optimization recommend actions, which makes the semantics prescriptive."
+    },
+    {
+      "id": "forecast-semantics",
+      "when": {
+        "problem_type": [
+          "forecast"
+        ]
+      },
+      "expect": {
+        "semantics": [
+          "forecasting",
+          "predictive"
+        ]
+      },
+      "text": "Forecasting problems normally have forecasting semantics. Check the Semantics ranking."
+    },
+    {
+      "id": "prescriptive-claim",
+      "when": {
+        "semantics": [
+          "prescriptive"
+        ]
+      },
+      "expect": {
+        "claim": [
+          "intervention",
+          "counterfactual"
+        ]
+      },
+      "text": "Prescriptive use recommends actions, which is an interventional claim. Check the kind of claim under Solution space."
+    },
+    {
+      "id": "mechanistic-algorithm",
+      "when": {
+        "representation": [
+          "mechanistic_group"
+        ]
+      },
+      "expect": {
+        "algorithm": [
+          "mechanistic_sim",
+          "statistical"
+        ]
+      },
+      "text": "An explicit mechanistic representation implies a mechanistic simulation (or a statistical model of it) as the model family."
+    },
+    {
+      "id": "simulator-algorithm",
+      "when": {
+        "algorithm": [
+          "mechanistic_sim"
+        ]
+      },
+      "expect": {
+        "representation": [
+          "mechanistic_group",
+          "hybrid"
+        ]
+      },
+      "text": "A mechanistic simulation carries explicit knowledge, so the numerical representation should be mechanistic or hybrid."
+    },
+    {
+      "id": "pinn-representation",
+      "when": {
+        "algorithm": [
+          "pinn"
+        ]
+      },
+      "expect": {
+        "representation": [
+          "physics_informed"
+        ]
+      },
+      "text": "A physics-informed neural network is physics-informed learning under Numerical representation."
+    },
+    {
+      "id": "physics-reg-representation",
+      "when": {
+        "constraints": [
+          "physics_regularization",
+          "conservation"
+        ]
+      },
+      "expect": {
+        "representation": [
+          "hybrid",
+          "empirical_priors",
+          "mechanistic_group"
+        ]
+      },
+      "text": "Physics constraints mean the model carries more than empirical knowledge. Check Numerical representation."
+    },
+    {
+      "id": "learning-none",
+      "when": {
+        "learning": [
+          "none"
+        ]
+      },
+      "expect": {
+        "representation": [
+          "mechanistic_group"
+        ]
+      },
+      "text": "A model that is not trained is normally explicit mechanistic. Check Numerical representation."
+    },
+    {
+      "id": "clustering-learning",
+      "when": {
+        "algorithm": [
+          "clustering"
+        ]
+      },
+      "expect": {
+        "learning": [
+          "unsupervised"
+        ]
+      },
+      "text": "Clustering is unsupervised. Check the learning setting."
+    },
+    {
+      "id": "scarce-deep",
+      "when": {
+        "data_regime": [
+          "data_scarce"
+        ],
+        "algorithm": [
+          "neural",
+          "generative_family"
+        ]
+      },
+      "expect": {
+        "representation": [
+          "hybrid",
+          "empirical_priors"
+        ]
+      },
+      "text": "A neural or generative model trained on scarce data without encoded structure will be hard to validate and calibrate. Consider encoding known structure or a simpler model family."
+    },
+    {
+      "id": "scarce-shift",
+      "when": {
+        "data_regime": [
+          "data_scarce"
+        ],
+        "shift_expected": [
+          true
+        ]
+      },
+      "expect": {
+        "representation": [
+          "hybrid",
+          "empirical_priors",
+          "mechanistic_group"
+        ]
+      },
+      "text": "Scarce data and expected shift together leave little room to validate across conditions empirically. Encoded physics or structure is the main lever for credibility here."
     }
   ]
 }

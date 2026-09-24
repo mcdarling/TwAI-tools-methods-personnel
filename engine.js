@@ -26,27 +26,58 @@
     return Array.isArray(v) ? v : [v];
   }
 
-  // A condition maps answer keys to allowed values. Special keys:
-  //   inputs_any:  at least one selected input is in the list
-  //   inputs_only: every selected input is in the list (and at least one is selected)
-  function matches(cond, a) {
+  // Index every taxonomy category by id so a condition naming a parent
+  // category (e.g. "neural") also matches its children (e.g. "cnn").
+  function indexTaxonomy(taxonomy) {
+    var nodes = {};
+    function walk(options, parent, questionId) {
+      (options || []).forEach(function (o) {
+        nodes[o.value] = { id: o.value, label: o.label, parent: parent, catalog: o.catalog || null, question: questionId };
+        walk(o.children, o.value, questionId);
+      });
+    }
+    ((taxonomy && taxonomy.sections) || []).forEach(function (s) {
+      s.questions.forEach(function (q) { walk(q.options, null, q.id); });
+    });
+    return nodes;
+  }
+
+  function lineage(nodes, id) {
+    var out = [];
+    for (var cur = id; cur !== null && cur !== undefined && out.indexOf(cur) < 0; cur = nodes[cur] ? nodes[cur].parent : null) out.push(cur);
+    return out;
+  }
+
+  // A condition maps answer keys to allowed categories. An answer matches when
+  // it, or any ancestor category, is allowed. Special keys:
+  //   inputs_any:  at least one selected input matches
+  //   inputs_only: every selected input matches (and at least one is selected)
+  function matches(cond, a, nodes) {
     if (!cond) return true;
+    nodes = nodes || {};
+    function ok(value, allowed) {
+      return lineage(nodes, value).some(function (x) { return allowed.indexOf(x) >= 0; });
+    }
     return Object.keys(cond).every(function (key) {
       var allowed = cond[key];
-      if (key === "inputs_any") return asList(a.inputs).some(function (x) { return allowed.indexOf(x) >= 0; });
+      if (key === "inputs_any") return asList(a.inputs).some(function (x) { return ok(x, allowed); });
       if (key === "inputs_only") {
         var ins = asList(a.inputs);
-        return ins.length > 0 && ins.every(function (x) { return allowed.indexOf(x) >= 0; });
+        return ins.length > 0 && ins.every(function (x) { return ok(x, allowed); });
       }
-      return asList(a[key]).some(function (x) { return allowed.indexOf(x) >= 0; });
+      return asList(a[key]).some(function (x) { return ok(x, allowed); });
     });
   }
 
-  function pickParadigm(paradigms, a) {
+  function answered(cond, a) {
+    return Object.keys(cond).every(function (key) { return asList(a[key]).length > 0; });
+  }
+
+  function pickParadigm(paradigms, a, nodes) {
     for (var i = 0; i < paradigms.length; i++) {
       var p = paradigms[i];
-      if (p.when && matches(p.when, a)) return p;
-      if (p.when_any && p.when_any.some(function (c) { return matches(c, a); })) return p;
+      if (p.when && matches(p.when, a, nodes)) return p;
+      if (p.when_any && p.when_any.some(function (c) { return matches(c, a, nodes); })) return p;
     }
     // Unanswered learning setting: fall back to the supervised rubric.
     return paradigms.filter(function (p) { return p.id === "supervised-ml"; })[0];
@@ -61,6 +92,7 @@
     var a = answers || {};
     var gcmm = data.gcmm;
     var methods = data.methods.methods;
+    var nodes = indexTaxonomy(data.taxonomy);
     var rolesById = {};
     data.roles.roles.forEach(function (r) { rolesById[r.id] = r; });
 
@@ -71,7 +103,7 @@
       flags.push({ severity: "block", text: "Choose a consequence level. GCMM sets the required maturity from it." });
     }
 
-    var paradigm = pickParadigm(gcmm.paradigms, a);
+    var paradigm = pickParadigm(gcmm.paradigms, a, nodes);
     if (paradigm.framework !== "instantiated") {
       flags.push({ severity: paradigm.framework === "gap" ? "rnd" : "info", text: paradigm.framework_note });
     }
@@ -88,8 +120,25 @@
           (target > 1 ? " Your target is level " + target + ", so documenting this comes first." : "")
       });
     }
-    if (a.semantics === "prescriptive" && a.claim === "association") {
-      flags.push({ severity: "warn", text: "Prescriptive use recommends actions, which is an interventional claim. Check the kind of claim under Solution space." });
+    // Consistency between rankings (taxonomy.json consistency_checks). Only
+    // fires when both sides are answered.
+    ((data.taxonomy && data.taxonomy.consistency_checks) || []).forEach(function (c) {
+      if (answered(c.when, a) && answered(c.expect, a) && matches(c.when, a, nodes) && !matches(c.expect, a, nodes)) {
+        flags.push({ severity: "warn", text: c.text, check: c.id });
+      }
+    });
+
+    // Categories the method catalog does not yet cover well.
+    var thin = [];
+    Object.keys(a).forEach(function (key) {
+      asList(a[key]).forEach(function (v) {
+        var noted = lineage(nodes, v).filter(function (id) { return nodes[id] && nodes[id].catalog; })[0];
+        if (noted && thin.indexOf(nodes[noted].label) < 0) thin.push(nodes[noted].label);
+      });
+    });
+    if (thin.length) {
+      flags.push({ severity: "warn", text: "The method catalog only partly covers " + thin.join(", ") +
+        ". Some \"No method\" or maturity results may reflect gaps in the catalog rather than in the field; check them with a specialist." });
     }
 
     // Requirements: rubric cells up to the target level, plus rule-forced and paradigm-specific ones.
@@ -107,7 +156,7 @@
       });
       if (paradigm.rubric) {
         gcmm.rules.forEach(function (rule) {
-          if (!matches(rule.when, a)) return;
+          if (!matches(rule.when, a, nodes)) return;
           flags.push({ severity: "info", text: rule.flag, provisional: rule.provisional });
           rule.add.forEach(function (id) {
             if (!selected[id]) selected[id] = { reason: "Required because " + rule.reason, rule: rule.id };
@@ -123,7 +172,7 @@
         .sort(function (x, y) { return x.level - y.level; })
         .map(function (r) {
           var candidates = methods
-            .filter(function (m) { return m.evidence.indexOf(r.id) >= 0 && matches(m.applies, a); })
+            .filter(function (m) { return m.evidence.indexOf(r.id) >= 0 && matches(m.applies, a, nodes); })
             .sort(function (x, y) { return MATURITY_RANK[y.maturity] - MATURITY_RANK[x.maturity]; });
           var best = candidates[0] || null;
           return {
@@ -245,5 +294,5 @@
     return L.join("\n");
   }
 
-  return { evaluate: evaluate, toMarkdown: toMarkdown, matches: matches, STATUS: STATUS, MATURITY_RANK: MATURITY_RANK };
+  return { evaluate: evaluate, toMarkdown: toMarkdown, matches: matches, indexTaxonomy: indexTaxonomy, lineage: lineage, STATUS: STATUS, MATURITY_RANK: MATURITY_RANK };
 });

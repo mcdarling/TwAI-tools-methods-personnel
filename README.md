@@ -26,6 +26,31 @@ evidence package can do that.
 Method maturity ratings, the option lists for each ranking, and rules marked
 `"provisional": true` in `data/gcmm.json` are first drafts for review.
 
+## Taxonomy (v0.2 draft)
+
+`data/taxonomy.json` holds the seven rankings from the ASA deck as independent
+facets. Each ranking has categories with definitions and examples, and
+categories can have sub-levels (for example Neural network → CNN). Only leaf
+categories are selectable. A method, rule, or check that names a parent
+category applies to all of its children.
+
+- **Breadth:** top levels cover computational tools generally (mechanistic
+  simulation, statistical models, classical ML, neural networks, scientific ML,
+  generative models, reinforcement learning). Only the ML branches have
+  detailed sub-categories and method coverage.
+- **Catalog coverage:** categories marked `"catalog": "partial"` or
+  `"not_populated"` make the planner warn that "No method" results may reflect
+  the catalog rather than the state of the field.
+- **Dependencies between rankings:** `consistency_checks` lists places where
+  one ranking constrains another (for example a PINN implies physics-informed
+  learning). The planner flags projects that break one. These checks are the
+  evidence for deciding whether any part of the taxonomy should become a strict
+  hierarchy instead of independent facets.
+- **Reference view:** the page's "Taxonomy reference" tab (or `#taxonomy` in
+  the URL) shows every category, definition, and check in readable form.
+
+Category ids must be unique across all rankings; the tests enforce this.
+
 ## How it works
 
 ```
@@ -42,7 +67,7 @@ answers ──► paradigm (from representation, learning setting, model family)
 
 | File | Contents |
 |---|---|
-| `data/taxonomy.json` | Questionnaire sections and options |
+| `data/taxonomy.json` | Taxonomy rankings, categories, definitions, and consistency checks |
 | `data/gcmm.json` | Elements, levels, consequence mapping, paradigms, rubric, rules |
 | `data/methods.json` | Method catalog: evidence produced, applicability, maturity, tools, roles |
 | `data/roles.json` | Personnel roles |
