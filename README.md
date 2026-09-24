@@ -47,7 +47,9 @@ category applies to all of its children.
   evidence for deciding whether any part of the taxonomy should become a strict
   hierarchy instead of independent facets.
 - **Reference view:** the page's "Taxonomy reference" tab (or `#taxonomy` in
-  the URL) shows every category, definition, and check in readable form.
+  the URL) opens with a one-screen overview of all seven rankings; select a
+  category to see its definition. Below it, a search box filters the full,
+  collapsible reference and the consistency checks.
 
 Category ids must be unique across all rankings; the tests enforce this.
 

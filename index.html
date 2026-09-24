@@ -115,9 +115,52 @@ fieldset.section {
 .view-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 
 /* Taxonomy reference */
-.ref { display: grid; gap: 16px; padding-top: 24px; max-width: 980px; }
+.ref { display: grid; gap: 16px; padding-top: 24px; }
 .ref-intro { margin: 0; max-width: 72ch; }
 .ref .panel h2 { font-size: 22px; }
+
+/* Overview: every ranking on one screen */
+.ov-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+.ov-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px 18px; }
+@media (min-width: 1180px) { .ov-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px 14px; } }
+.ov-col { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.ov-col-head { border-bottom: 2px solid var(--accent); padding-bottom: 6px; display: grid; gap: 2px; }
+.ov-col-head .sec-num { padding: 0; }
+.ov-col-head h3 { font: 600 17px/1.15 var(--display); }
+.ov-col-head span.count { font-size: 12px; color: var(--muted); }
+.ov-q { font-size: 12px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+.ov-group { display: grid; gap: 4px; }
+.ov-group-label { font: 500 10.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ov-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.ov-chip {
+  border: 1px solid var(--line); background: var(--bg); border-radius: 4px;
+  padding: 3px 7px; font-size: 12.5px; line-height: 1.25; cursor: pointer; text-align: left;
+}
+.ov-chip:hover { border-color: var(--accent); }
+.ov-chip.thin { border-style: dashed; }
+.ov-chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.ov-chip.dim { opacity: .3; }
+.ov-chip.hit { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.ov-legend { font-size: 12px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+.ov-legend i { display: inline-block; width: 18px; height: 11px; border: 1px dashed var(--muted); border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+.ov-detail { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 4px; min-height: 64px; }
+.ov-detail .path { font: 500 11px/1.3 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.ov-detail h3 { font: 600 19px/1.2 var(--display); }
+
+/* Search and collapsible full reference */
+.ref-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.ref-tools input[type="search"] {
+  flex: 1 1 260px; min-width: 0; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface); padding: 8px 10px;
+}
+.ref-count { font-size: 13px; color: var(--muted); min-width: 12ch; }
+details.ref-sec > summary { cursor: pointer; list-style: none; display: flex; gap: 10px; align-items: flex-start; }
+details.ref-sec > summary::-webkit-details-marker { display: none; }
+details.ref-sec > summary::before { content: "▸"; color: var(--muted); font-size: 13px; padding-top: 6px; transition: transform .15s; }
+details.ref-sec[open] > summary::before { transform: rotate(90deg); }
+details.ref-sec > summary .sec-head { flex: 1; }
+.ref-body { display: grid; gap: 14px; padding-top: 14px; max-width: 980px; }
+.tree li.flash { background: var(--accent-soft); border-radius: 4px; transition: background 1.2s; }
 .ref h3 { font-size: 16px; font-weight: 600; font-family: var(--body); }
 .tree, .tree ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .tree ul { margin: 8px 0 0 6px; padding-left: 14px; border-left: 2px solid var(--line); }
@@ -368,12 +411,60 @@ textarea.fallback { width: 100%; min-height: 160px; font: 12px/1.5 var(--mono); 
 
   function buildReference() {
     var nodes = PlannerEngine.indexTaxonomy(taxonomy);
-    var qLabel = {};
-    taxonomy.sections.forEach(function (s) { s.questions.forEach(function (q) { qLabel[q.id] = s.title + " › " + q.label; }); });
+    var qLabel = {}, optByValue = {}, pathOf = {};
+    var rankings = taxonomy.sections.filter(function (s) { return s.kind === "taxonomy"; });
+    taxonomy.sections.forEach(function (s) {
+      s.questions.forEach(function (q) {
+        qLabel[q.id] = s.title + " › " + q.label;
+        (function walk(opts, trail) {
+          (opts || []).forEach(function (o) {
+            optByValue[o.value] = o;
+            pathOf[o.value] = [s.title, q.label].concat(trail);
+            walk(o.children, trail.concat([o.label]));
+          });
+        })(q.options, []);
+      });
+    });
+    function leafCount(opts) { return (opts || []).reduce(function (n, o) { return n + (o.children ? leafCount(o.children) : 1); }, 0); }
+    function searchText(o) { return [o.label, o.value, o.hint, o.definition, (o.examples || []).join(" "), o.note].join(" ").toLowerCase(); }
+
+    // 1. Overview
+    function chip(o) {
+      return '<button type="button" class="ov-chip' + (o.catalog ? ' thin' : '') + '" data-cat="' + esc(o.value) + '" aria-pressed="false"' +
+        (o.definition ? ' title="' + esc(o.definition) + '"' : '') + '>' + esc(o.label) + '</button>';
+    }
+    var cols = rankings.map(function (s, i) {
+      var qs = s.questions.filter(function (q) { return q.options; });
+      var total = qs.reduce(function (n, q) { return n + leafCount(q.options); }, 0);
+      return '<div class="ov-col"><div class="ov-col-head"><span class="sec-num">R' + (i + 1) + '</span><h3>' + esc(s.title) + '</h3><span class="count">' + total + ' categories</span></div>' +
+        qs.map(function (q) {
+          var flat = q.options.filter(function (o) { return !o.children; });
+          var groups = q.options.filter(function (o) { return o.children; });
+          return (qs.length > 1 ? '<div class="ov-q">' + esc(q.label) + '</div>' : '') +
+            (flat.length ? '<div class="ov-chips">' + flat.map(chip).join("") + '</div>' : '') +
+            groups.map(function (g) {
+              return '<div class="ov-group"><span class="ov-group-label">' + esc(g.label) + '</span><div class="ov-chips">' + g.children.map(chip).join("") + '</div></div>';
+            }).join("");
+        }).join("") + '</div>';
+    }).join("");
+    var totalAll = rankings.reduce(function (n, s) { return n + s.questions.reduce(function (m, q) { return m + leafCount(q.options); }, 0); }, 0);
+
+    var out = [];
+    out.push('<section class="panel" aria-labelledby="ov-h"><div class="ov-head"><h2 id="ov-h">Taxonomy at a glance</h2>' +
+      '<span class="sub">' + rankings.length + ' rankings · ' + totalAll + ' categories · ' + taxonomy.consistency_checks.length + ' consistency checks · version ' + esc(taxonomy.version) + '</span></div>' +
+      '<p class="sub">Select any category to see its definition. A dashed outline means the method catalog only partly covers it.</p>' +
+      '<div class="ov-grid">' + cols + '</div>' +
+      '<div class="ov-detail" id="ov-detail" aria-live="polite"><p class="sub">No category selected.</p></div></section>');
+
+    // 2. Search and full reference
+    out.push('<div class="ref-tools"><label class="q-label" for="tax-search">Search</label>' +
+      '<input type="search" id="tax-search" placeholder="Search names, definitions, and examples, e.g. surrogate">' +
+      '<span class="ref-count" id="ref-count"></span>' +
+      '<button type="button" class="btn ghost" id="ref-expand">Expand all</button><button type="button" class="btn ghost" id="ref-collapse">Collapse all</button></div>');
 
     function tree(options) {
       return '<ul>' + options.map(function (o) {
-        return '<li><span class="cat-name">' + esc(o.label) + '</span><span class="cat-id">' + esc(o.value) + '</span>' +
+        return '<li id="cat-' + esc(o.value) + '" data-text="' + esc(searchText(o)) + '"><span class="cat-name">' + esc(o.label) + '</span><span class="cat-id">' + esc(o.value) + '</span>' +
           (o.catalog ? ' <span class="pill maturing">' + CATALOG_NOTE[o.catalog] + '</span>' : '') +
           (o.definition ? '<p class="cat-def">' + esc(o.definition) + '</p>' : (o.hint ? '<p class="cat-def">' + esc(o.hint) + '</p>' : '')) +
           (o.examples && o.examples.length ? '<p class="cat-ex">Examples: ' + o.examples.map(esc).join("; ") + '</p>' : '') +
@@ -386,24 +477,88 @@ textarea.fallback { width: 100%; min-height: 160px; font: 12px/1.5 var(--mono); 
         return (qLabel[k] || k) + ": " + c[k].map(function (v) { return v === true ? "yes" : nodes[v] ? nodes[v].label : v; }).join(" or ");
       }).join(" and ");
     }
-
-    var out = ['<p class="ref-intro">' + esc(taxonomy.structure_note) + '</p>'];
-    var n = 0;
-    taxonomy.sections.forEach(function (s) {
-      if (s.kind !== "taxonomy") return;
-      n++;
-      out.push('<section class="panel" id="ref-' + s.id + '"><div class="sec-head"><span class="sec-num">R' + n + '</span><h2>' + esc(s.title) + '</h2><p class="sec-help">' + esc(s.help) + '</p></div>' +
+    rankings.forEach(function (s, i) {
+      out.push('<details class="panel ref-sec" id="ref-' + s.id + '"><summary><div class="sec-head"><span class="sec-num">R' + (i + 1) + '</span><h2>' + esc(s.title) + '</h2><p class="sec-help">' + esc(s.help) + '</p></div></summary><div class="ref-body">' +
         s.questions.filter(function (q) { return q.options; }).map(function (q) {
           return '<div><h3>' + esc(q.label) + '</h3><div class="tree">' + tree(q.options) + '</div></div>';
-        }).join("") + '</section>');
+        }).join("") + '</div></details>');
     });
-    out.push('<section class="panel" id="ref-checks"><h2>Where rankings depend on each other</h2>' +
-      '<p class="sub">Each check below is a place where one ranking constrains another. The planner flags a project that breaks one. If many checks pile up around one ranking, that part may work better as a strict hierarchy.</p><ul class="checks">' +
+    out.push('<details class="panel ref-sec" id="ref-checks"><summary><div class="sec-head"><span class="sec-num">' + taxonomy.consistency_checks.length + '</span><h2>Where rankings depend on each other</h2>' +
+      '<p class="sec-help">Each check is a place where one ranking constrains another. The planner flags a project that breaks one. If many checks pile up around one ranking, that part may work better as a strict hierarchy.</p></div></summary><div class="ref-body"><ul class="checks">' +
       taxonomy.consistency_checks.map(function (c) {
-        return '<li><span class="rule-line">If ' + esc(cond(c.when)) + '<br>then expect ' + esc(cond(c.expect)) + '</span><span class="detail">' + esc(c.text) + '</span></li>';
-      }).join("") + '</ul></section>');
+        var text = ("if " + cond(c.when) + " then expect " + cond(c.expect) + " " + c.text).toLowerCase();
+        return '<li data-text="' + esc(text) + '"><span class="rule-line">If ' + esc(cond(c.when)) + '<br>then expect ' + esc(cond(c.expect)) + '</span><span class="detail">' + esc(c.text) + '</span></li>';
+      }).join("") + '</ul></div></details>');
+    out.push('<p class="ref-intro sub">' + esc(taxonomy.structure_note) + '</p>');
     out.push('<p class="footnote">Taxonomy version ' + esc(taxonomy.version) + '. ' + esc(taxonomy.source) + '</p>');
-    document.getElementById("view-taxonomy").innerHTML = out.join("");
+
+    var root = document.getElementById("view-taxonomy");
+    root.innerHTML = out.join("");
+
+    // Overview interaction
+    var detail = document.getElementById("ov-detail");
+    root.querySelectorAll(".ov-chip").forEach(function (b) {
+      b.addEventListener("click", function () {
+        root.querySelectorAll('.ov-chip[aria-pressed="true"]').forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
+        b.setAttribute("aria-pressed", "true");
+        var o = optByValue[b.dataset.cat];
+        detail.innerHTML = '<span class="path">' + esc(pathOf[o.value].join(" › ")) + '</span><h3>' + esc(o.label) +
+          (o.catalog ? ' <span class="pill maturing">' + CATALOG_NOTE[o.catalog] + '</span>' : '') + '</h3>' +
+          '<p class="cat-def">' + esc(o.definition || o.hint || "No definition yet.") + '</p>' +
+          (o.examples && o.examples.length ? '<p class="cat-ex">Examples: ' + o.examples.map(esc).join("; ") + '</p>' : '') +
+          (o.note ? '<p class="cat-note">' + esc(o.note) + '</p>' : '') +
+          '<div><button type="button" class="btn ghost" id="ov-jump">Show in full reference</button></div>';
+        document.getElementById("ov-jump").addEventListener("click", function () {
+          var li = document.getElementById("cat-" + o.value);
+          if (!li) return;
+          li.closest("details").open = true;
+          li.hidden = false;
+          li.scrollIntoView({ block: "center", behavior: "smooth" });
+          li.classList.add("flash");
+          setTimeout(function () { li.classList.remove("flash"); }, 1400);
+        });
+      });
+    });
+
+    // Expand / collapse
+    var secs = root.querySelectorAll("details.ref-sec");
+    document.getElementById("ref-expand").addEventListener("click", function () { secs.forEach(function (d) { d.open = true; }); });
+    document.getElementById("ref-collapse").addEventListener("click", function () { secs.forEach(function (d) { d.open = false; }); });
+
+    // Search: filter the full reference and highlight overview chips
+    var input = document.getElementById("tax-search"), count = document.getElementById("ref-count");
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var hits = 0;
+      function filter(li, parentHit) {
+        var self = !q || li.dataset.text.indexOf(q) >= 0;
+        var kids = Array.prototype.filter.call(li.children, function (c) { return c.tagName === "UL"; });
+        var childVisible = false;
+        kids.forEach(function (ul) {
+          Array.prototype.forEach.call(ul.children, function (c) { if (filter(c, parentHit || (q && self))) childVisible = true; });
+        });
+        var visible = self || childVisible || parentHit;
+        li.hidden = !visible;
+        if (q && self && !kids.length) hits++;
+        return visible;
+      }
+      secs.forEach(function (d) {
+        var any = false;
+        d.querySelectorAll(".tree > ul > li").forEach(function (li) { if (filter(li, false)) any = true; });
+        d.querySelectorAll(".checks > li").forEach(function (li) {
+          var m = !q || li.dataset.text.indexOf(q) >= 0;
+          li.hidden = !m; if (m) any = true;
+        });
+        d.hidden = !!q && !any;
+        if (q && any) d.open = true;
+      });
+      root.querySelectorAll(".ov-chip").forEach(function (b) {
+        var m = q && searchText(optByValue[b.dataset.cat]).indexOf(q) >= 0;
+        b.classList.toggle("hit", !!m);
+        b.classList.toggle("dim", !!q && !m);
+      });
+      count.textContent = q ? hits + " categor" + (hits === 1 ? "y" : "ies") + " match" : "";
+    });
   }
 
   var SEVERITY = { block: "Blocker", rnd: "R&D", warn: "Check", info: "Note" };
