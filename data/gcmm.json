@@ -1,0 +1,570 @@
+{
+  "source": "Nichol & Darling, 'From Incredible Claims to Credible AI: Evidence-Backed Maturity Profiles for Risk-Informed AI Assurance' (AAAI-26). Tables 1-3.",
+  "elements": [
+    {
+      "id": "RF",
+      "name": "Representational Fidelity",
+      "question": "Does the model include the variables, scales, operating conditions, measurements, and use-time information needed for the target?"
+    },
+    {
+      "id": "MF",
+      "name": "Mechanistic / Functional Fidelity",
+      "question": "Do the modeled or learned relationships reflect relevant mechanisms, constraints, invariances, causal structure, or functional dependencies?"
+    },
+    {
+      "id": "IV",
+      "name": "Implementation Verification",
+      "question": "Does the implemented system correctly realize the specified model, data pipeline, features, configuration, training, evaluation, and deployment logic?"
+    },
+    {
+      "id": "EV",
+      "name": "Execution Verification",
+      "question": "Are reported results free from material numerical, stochastic, procedural, sampling, workflow, or reproducibility errors?"
+    },
+    {
+      "id": "VAL",
+      "name": "Validation",
+      "question": "Does evidence compare model behavior with relevant reality across intended operating conditions, populations, workflows, and shifts?"
+    },
+    {
+      "id": "US",
+      "name": "Uncertainty & Sensitivity Characterization",
+      "question": "Are uncertainties, sensitivities, brittle operating conditions, calibration limits, and confidence claims characterized and communicated?"
+    }
+  ],
+  "levels": [
+    {
+      "level": 0,
+      "name": "Ad hoc / unsupported",
+      "review": "Judgment alone",
+      "review_role": null
+    },
+    {
+      "level": 1,
+      "name": "Documented / justified",
+      "review": "Assessed by developers only",
+      "review_role": null
+    },
+    {
+      "level": 2,
+      "name": "Systematic / evidence-backed",
+      "review": "Some peer review",
+      "review_role": "peer_reviewer"
+    },
+    {
+      "level": 3,
+      "name": "Operationally mature / structurally justified",
+      "review": "Independent peer review",
+      "review_role": "independent_review"
+    }
+  ],
+  "consequence": {
+    "low": {
+      "label": "Low consequence, low impact",
+      "target": 0
+    },
+    "moderate": {
+      "label": "Moderate consequence, moderate impact",
+      "target": 1
+    },
+    "high": {
+      "label": "High consequence, high impact",
+      "target": 2
+    },
+    "critical": {
+      "label": "High consequence, critical decision impact",
+      "target": 3
+    }
+  },
+  "paradigms": [
+    {
+      "id": "pde-sbes",
+      "name": "Explicit mechanistic model (PDE / simulation)",
+      "when": {
+        "representation": [
+          "mechanistic"
+        ]
+      },
+      "framework": "external",
+      "framework_note": "PCMM (SAND2007-5948) is the established credibility framework for this paradigm. Its methods are not yet in this catalog, so no requirements are generated.",
+      "rubric": null
+    },
+    {
+      "id": "sciml-hybrid",
+      "name": "Scientific ML / hybrid physics-data model",
+      "when_any": [
+        {
+          "representation": [
+            "hybrid"
+          ]
+        },
+        {
+          "algorithm": [
+            "pinn"
+          ]
+        }
+      ],
+      "framework": "gap",
+      "framework_note": "GCMM names SciML and hybrid models but has no instantiated rubric for them yet. The supervised-ML rubric is used as a baseline for the learned component, plus the paradigm-specific evidence needs the paper lists (surrogate error, simulator coupling, physical constraints).",
+      "rubric": "supervised-ml",
+      "extra_requirements": [
+        "hy.surrogate_error",
+        "hy.coupling",
+        "hy.physics_constraints"
+      ]
+    },
+    {
+      "id": "generative",
+      "name": "Generative / foundation model",
+      "when_any": [
+        {
+          "learning": [
+            "generative"
+          ]
+        },
+        {
+          "algorithm": [
+            "foundation"
+          ]
+        }
+      ],
+      "framework": "gap",
+      "framework_note": "No GCMM instantiation exists for generative or foundation models. The supervised-ML rubric is used as a partial baseline.",
+      "rubric": "supervised-ml",
+      "extra_requirements": [
+        "gen.output_validity",
+        "gen.provenance"
+      ]
+    },
+    {
+      "id": "unsupervised",
+      "name": "Unsupervised learning",
+      "when": {
+        "learning": [
+          "unsupervised"
+        ]
+      },
+      "framework": "gap",
+      "framework_note": "No GCMM instantiation exists for unsupervised learning. The supervised-ML rubric is used as a partial baseline; label-based validation does not apply directly.",
+      "rubric": "supervised-ml",
+      "extra_requirements": [
+        "un.structure_validity"
+      ]
+    },
+    {
+      "id": "rl",
+      "name": "Reinforcement learning",
+      "when": {
+        "learning": [
+          "reinforcement"
+        ]
+      },
+      "framework": "gap",
+      "framework_note": "No GCMM instantiation exists for reinforcement learning. The supervised-ML rubric is used as a partial baseline.",
+      "rubric": "supervised-ml",
+      "extra_requirements": [
+        "rl.env_fidelity"
+      ]
+    },
+    {
+      "id": "supervised-ml",
+      "name": "Supervised machine learning",
+      "when": {
+        "learning": [
+          "supervised"
+        ]
+      },
+      "framework": "instantiated",
+      "framework_note": "Rubric from GCMM Table 3 (supervised ML).",
+      "rubric": "supervised-ml"
+    }
+  ],
+  "rubrics": {
+    "supervised-ml": [
+      {
+        "id": "rf.feature_list",
+        "element": "RF",
+        "level": 1,
+        "label": "Feature list with domain rationale"
+      },
+      {
+        "id": "rf.availability",
+        "element": "RF",
+        "level": 1,
+        "label": "Inference-time feature availability check"
+      },
+      {
+        "id": "rf.basic_leakage",
+        "element": "RF",
+        "level": 1,
+        "label": "Basic leakage screening"
+      },
+      {
+        "id": "rf.ablation",
+        "element": "RF",
+        "level": 2,
+        "label": "Feature ablation studies"
+      },
+      {
+        "id": "rf.missingness",
+        "element": "RF",
+        "level": 2,
+        "label": "Missingness and measurement-quality analysis"
+      },
+      {
+        "id": "rf.coverage",
+        "element": "RF",
+        "level": 2,
+        "label": "Operating-domain coverage assessment"
+      },
+      {
+        "id": "rf.structural",
+        "element": "RF",
+        "level": 3,
+        "label": "Structural or causal rationale for the representation"
+      },
+      {
+        "id": "rf.selection_bias",
+        "element": "RF",
+        "level": 3,
+        "label": "Selection-bias analysis"
+      },
+      {
+        "id": "rf.confounding",
+        "element": "RF",
+        "level": 3,
+        "label": "Confounding analysis"
+      },
+      {
+        "id": "rf.shift_analysis",
+        "element": "RF",
+        "level": 3,
+        "label": "Distribution-shift analysis"
+      },
+      {
+        "id": "mf.plausibility",
+        "element": "MF",
+        "level": 1,
+        "label": "Plausibility checks and domain review"
+      },
+      {
+        "id": "mf.attribution",
+        "element": "MF",
+        "level": 1,
+        "label": "Simple attribution of model reliance"
+      },
+      {
+        "id": "mf.stress",
+        "element": "MF",
+        "level": 2,
+        "label": "Stress and edge-case tests"
+      },
+      {
+        "id": "mf.subgroup",
+        "element": "MF",
+        "level": 2,
+        "label": "Subgroup and operating-regime analysis"
+      },
+      {
+        "id": "mf.constraints",
+        "element": "MF",
+        "level": 2,
+        "label": "Constraint, monotonicity, or prior checks"
+      },
+      {
+        "id": "mf.mechanism",
+        "element": "MF",
+        "level": 3,
+        "label": "Learned behavior tied to stable mechanisms"
+      },
+      {
+        "id": "mf.drift",
+        "element": "MF",
+        "level": 3,
+        "label": "Concept / mechanism drift monitoring"
+      },
+      {
+        "id": "iv.vcs",
+        "element": "IV",
+        "level": 1,
+        "label": "Version control for code, data, and configuration"
+      },
+      {
+        "id": "iv.basic_tests",
+        "element": "IV",
+        "level": 1,
+        "label": "Basic unit tests"
+      },
+      {
+        "id": "iv.split_doc",
+        "element": "IV",
+        "level": 1,
+        "label": "Documented split and pipeline assumptions"
+      },
+      {
+        "id": "iv.ci",
+        "element": "IV",
+        "level": 2,
+        "label": "Continuous integration"
+      },
+      {
+        "id": "iv.pipeline_tests",
+        "element": "IV",
+        "level": 2,
+        "label": "Regression and pipeline tests"
+      },
+      {
+        "id": "iv.leakage_auto",
+        "element": "IV",
+        "level": 2,
+        "label": "Automated leakage checks"
+      },
+      {
+        "id": "iv.env",
+        "element": "IV",
+        "level": 2,
+        "label": "Reproducible environments"
+      },
+      {
+        "id": "iv.defect_bound",
+        "element": "IV",
+        "level": 3,
+        "label": "Defects shown absent or negligible for the intended use"
+      },
+      {
+        "id": "ev.seeds",
+        "element": "EV",
+        "level": 1,
+        "label": "Seeds and environment logged"
+      },
+      {
+        "id": "ev.rerun",
+        "element": "EV",
+        "level": 1,
+        "label": "Basic rerun checks"
+      },
+      {
+        "id": "ev.multirun",
+        "element": "EV",
+        "level": 2,
+        "label": "Multi-run stability"
+      },
+      {
+        "id": "ev.convergence",
+        "element": "EV",
+        "level": 2,
+        "label": "Convergence criteria"
+      },
+      {
+        "id": "ev.sampling_error",
+        "element": "EV",
+        "level": 2,
+        "label": "Sampling-error analysis"
+      },
+      {
+        "id": "ev.procedures",
+        "element": "EV",
+        "level": 2,
+        "label": "Documented execution procedures"
+      },
+      {
+        "id": "ev.bounded",
+        "element": "EV",
+        "level": 3,
+        "label": "Execution error bounded and shown decision-insignificant"
+      },
+      {
+        "id": "val.holdout",
+        "element": "VAL",
+        "level": 1,
+        "label": "Holdout or cross-validation"
+      },
+      {
+        "id": "val.baselines",
+        "element": "VAL",
+        "level": 1,
+        "label": "Baseline comparisons"
+      },
+      {
+        "id": "val.subgroup_basic",
+        "element": "VAL",
+        "level": 1,
+        "label": "Basic subgroup checks"
+      },
+      {
+        "id": "val.external",
+        "element": "VAL",
+        "level": 2,
+        "label": "Temporal, site, or external validation"
+      },
+      {
+        "id": "val.calibration",
+        "element": "VAL",
+        "level": 2,
+        "label": "Calibration assessment"
+      },
+      {
+        "id": "val.labels",
+        "element": "VAL",
+        "level": 2,
+        "label": "Label-quality assessment"
+      },
+      {
+        "id": "val.shift_aware",
+        "element": "VAL",
+        "level": 3,
+        "label": "Shift-aware operational validation"
+      },
+      {
+        "id": "val.failure_modes",
+        "element": "VAL",
+        "level": 3,
+        "label": "Failure modes and acceptance criteria defined"
+      },
+      {
+        "id": "val.monitoring",
+        "element": "VAL",
+        "level": 3,
+        "label": "Operational performance monitoring"
+      },
+      {
+        "id": "us.confidence",
+        "element": "US",
+        "level": 1,
+        "label": "Confidence proxy, calibration check, or feature importance"
+      },
+      {
+        "id": "us.calibrated_uq",
+        "element": "US",
+        "level": 2,
+        "label": "Calibrated uncertainty"
+      },
+      {
+        "id": "us.interactions",
+        "element": "US",
+        "level": 2,
+        "label": "Sensitivity and interactions identified"
+      },
+      {
+        "id": "us.brittle",
+        "element": "US",
+        "level": 2,
+        "label": "Brittle regimes and thresholds identified"
+      },
+      {
+        "id": "us.decision_coupled",
+        "element": "US",
+        "level": 3,
+        "label": "Decision-coupled uncertainty (abstention, escalation, revalidation)"
+      }
+    ]
+  },
+  "extra_requirements": [
+    {
+      "id": "hy.surrogate_error",
+      "element": "US",
+      "level": 1,
+      "label": "Surrogate / learned-component error characterized and propagated"
+    },
+    {
+      "id": "hy.coupling",
+      "element": "IV",
+      "level": 1,
+      "label": "Verification of simulator-ML coupling"
+    },
+    {
+      "id": "hy.physics_constraints",
+      "element": "MF",
+      "level": 1,
+      "label": "Evidence that physical constraints are satisfied"
+    },
+    {
+      "id": "gen.output_validity",
+      "element": "VAL",
+      "level": 1,
+      "label": "Validity of generated content against reference reality"
+    },
+    {
+      "id": "gen.provenance",
+      "element": "IV",
+      "level": 1,
+      "label": "Provenance and verification of third-party model weights and training data"
+    },
+    {
+      "id": "un.structure_validity",
+      "element": "VAL",
+      "level": 1,
+      "label": "Validity and stability of discovered structure"
+    },
+    {
+      "id": "rl.env_fidelity",
+      "element": "RF",
+      "level": 1,
+      "label": "Fidelity of the training environment to the deployment environment"
+    }
+  ],
+  "rules": [
+    {
+      "id": "causal-claim",
+      "provisional": true,
+      "when": {
+        "claim": [
+          "intervention",
+          "counterfactual"
+        ]
+      },
+      "add": [
+        "rf.structural",
+        "rf.confounding",
+        "mf.mechanism"
+      ],
+      "flag": "You plan to use the model to reason about interventions or counterfactuals. A model learned only from observational data cannot support causal claims without explicit structural assumptions (GCMM paper, causal ladder discussion), so structural evidence is required whatever the consequence level.",
+      "reason": "the model will support causal claims"
+    },
+    {
+      "id": "shift-expected",
+      "provisional": true,
+      "when": {
+        "shift_expected": [
+          true
+        ]
+      },
+      "add": [
+        "rf.shift_analysis",
+        "val.shift_aware"
+      ],
+      "flag": "You expect the operating conditions to shift after training, so shift analysis and shift-aware validation are required whatever the consequence level.",
+      "reason": "operating conditions are expected to shift"
+    },
+    {
+      "id": "operational-use",
+      "provisional": true,
+      "when": {
+        "deployment": [
+          "operational",
+          "autonomous"
+        ]
+      },
+      "add": [
+        "val.monitoring",
+        "mf.drift"
+      ],
+      "flag": "The model will run operationally, so post-deployment monitoring and drift detection are required.",
+      "reason": "the model will run operationally"
+    },
+    {
+      "id": "autonomous-use",
+      "provisional": true,
+      "when": {
+        "deployment": [
+          "autonomous"
+        ]
+      },
+      "add": [
+        "us.decision_coupled"
+      ],
+      "flag": "The model acts without a human in the loop, so it needs defined abstention or escalation behavior.",
+      "reason": "the model acts without a human in the loop"
+    }
+  ]
+}

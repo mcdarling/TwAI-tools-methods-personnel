@@ -1,0 +1,14 @@
+{
+  "roles": [
+    { "id": "ml_engineer",        "name": "ML engineer / data scientist", "skills": "Model development, feature engineering, evaluation" },
+    { "id": "data_engineer",      "name": "Data engineer", "skills": "Pipelines, data versioning, data-quality checks" },
+    { "id": "domain_sme",         "name": "Domain subject-matter expert", "skills": "Knows the phenomena, the operating domain, and what plausible behavior looks like" },
+    { "id": "statistician",       "name": "Statistician / UQ analyst", "skills": "Sampling design, resampling, calibration, uncertainty and sensitivity analysis" },
+    { "id": "causal",             "name": "Causal inference specialist", "skills": "Causal DAGs, identification, confounding and selection-bias analysis" },
+    { "id": "sciml",              "name": "Scientific ML / computational scientist", "skills": "Physics-informed learning, surrogates, numerical methods, simulator coupling" },
+    { "id": "vv_analyst",         "name": "V&V / credibility analyst", "skills": "Verification, validation, acceptance criteria, credibility assessment (PCMM/GCMM)" },
+    { "id": "sqa",                "name": "Software quality / MLOps engineer", "skills": "CI, testing, reproducible environments, deployment and monitoring" },
+    { "id": "peer_reviewer",      "name": "Peer reviewer", "skills": "Reviews evidence packages (required for level 2)" },
+    { "id": "independent_review", "name": "Independent review team", "skills": "Reviews and reproduces evidence independently of the developers (required for level 3)" }
+  ]
+}

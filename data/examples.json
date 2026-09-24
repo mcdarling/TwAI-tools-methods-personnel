@@ -1,0 +1,104 @@
+{
+  "examples": [
+    {
+      "id": "ae-rf",
+      "name": "AE damage classification",
+      "source": "Kaggle acoustic-emission example from the ASA deck (slides 11-18). Consequence, deployment, and team are illustrative.",
+      "answers": {
+        "intended_use": "Flag and classify structural damage in composite aircraft components from acoustic-emission features to support inspection decisions.",
+        "consequence": "high",
+        "deployment": "decision_support",
+        "intended_use_documented": true,
+        "operating_domain_documented": false,
+        "shift_expected": true,
+        "decision_context": "Aircraft component health",
+        "domain_expertise": "Acoustic emission / NDE, composite materials",
+        "question": "Does AE data show that a component is damaged?",
+        "claim": "association",
+        "inputs": ["continuous", "ordinal", "categorical"],
+        "output": "categorical",
+        "learning": "supervised",
+        "representation": "empirical",
+        "semantics": "diagnostic",
+        "constraints": ["encoding"],
+        "algorithm": "tree_ensemble",
+        "roles": ["ml_engineer", "data_engineer", "domain_sme"]
+      }
+    },
+    {
+      "id": "e3sm-rf",
+      "name": "E3SM sea-ice feature analysis",
+      "source": "GCMM paper case study (Nichol et al. 2021): diagnostic screening, moderate consequence. Team is illustrative.",
+      "answers": {
+        "intended_use": "Diagnostic screening of which June-August climate variables drive September Arctic sea-ice extent, to guide climate-model development.",
+        "consequence": "moderate",
+        "deployment": "analysis",
+        "intended_use_documented": true,
+        "operating_domain_documented": true,
+        "shift_expected": false,
+        "decision_context": "Climate-model development",
+        "domain_expertise": "Arctic sea ice, Earth system modeling",
+        "question": "Which summer variables are most influential for September sea-ice extent in E3SM versus observations?",
+        "claim": "association",
+        "inputs": ["continuous"],
+        "output": "continuous",
+        "learning": "supervised",
+        "representation": "empirical",
+        "semantics": "diagnostic",
+        "constraints": ["feature_engineering"],
+        "algorithm": "tree_ensemble",
+        "roles": ["ml_engineer", "domain_sme", "statistician"]
+      }
+    },
+    {
+      "id": "e3sm-causal",
+      "name": "E3SM, stronger claim",
+      "source": "The E3SM case pushed to the stronger claims the paper says its evidence cannot support: causal attribution at high consequence.",
+      "answers": {
+        "intended_use": "Attribute September sea-ice decline to specific summer drivers to inform model-physics changes.",
+        "consequence": "high",
+        "deployment": "decision_support",
+        "intended_use_documented": true,
+        "operating_domain_documented": true,
+        "shift_expected": true,
+        "decision_context": "Climate-model development",
+        "domain_expertise": "Arctic sea ice, Earth system modeling",
+        "question": "Which summer drivers cause September sea-ice decline?",
+        "claim": "intervention",
+        "inputs": ["continuous"],
+        "output": "continuous",
+        "learning": "supervised",
+        "representation": "empirical",
+        "semantics": "diagnostic",
+        "constraints": ["feature_engineering"],
+        "algorithm": "tree_ensemble",
+        "roles": ["ml_engineer", "domain_sme", "statistician"]
+      }
+    },
+    {
+      "id": "ae-hybrid",
+      "name": "Physics-informed AE waveform model",
+      "source": "Hypothetical neighbor of the AE example: raw waveforms and a wave-propagation physics loss.",
+      "answers": {
+        "intended_use": "Localize and classify damage in composite components from raw AE waveforms, constrained by wave-propagation physics.",
+        "consequence": "high",
+        "deployment": "operational",
+        "intended_use_documented": true,
+        "operating_domain_documented": true,
+        "shift_expected": true,
+        "decision_context": "Aircraft component health",
+        "domain_expertise": "Acoustic emission / NDE, elastic wave propagation in composites",
+        "question": "Where is damage located and what type is it?",
+        "claim": "association",
+        "inputs": ["waveform", "continuous"],
+        "output": "categorical",
+        "learning": "supervised",
+        "representation": "hybrid",
+        "semantics": "diagnostic",
+        "constraints": ["physics_regularization"],
+        "algorithm": "pinn",
+        "roles": ["ml_engineer", "domain_sme", "sciml"]
+      }
+    }
+  ]
+}

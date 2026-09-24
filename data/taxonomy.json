@@ -1,0 +1,147 @@
+{
+  "source": "Acquesta, Darling & Nichol, 'Towards Certifying Trustworthy Machine Learning Models for Acoustic Signal Classification' (ASA, May 2026), slide 10. Option lists are provisional.",
+  "sections": [
+    {
+      "id": "context", "title": "Application context", "kind": "gcmm",
+      "help": "GCMM ties every credibility claim to an intended use, a consequence level, and an operating domain.",
+      "questions": [
+        { "id": "intended_use", "type": "text", "label": "Intended use", "placeholder": "What decision or analysis will the model's output feed?" },
+        { "id": "consequence", "type": "single", "label": "Consequence of a wrong answer",
+          "options": [
+            { "value": "low", "label": "Low", "hint": "Exploratory; little impact if wrong" },
+            { "value": "moderate", "label": "Moderate", "hint": "Could misdirect work, but no direct safety or policy effect" },
+            { "value": "high", "label": "High", "hint": "Informs high-consequence decisions" },
+            { "value": "critical", "label": "Critical", "hint": "High consequence and directly drives critical decisions" }
+          ] },
+        { "id": "deployment", "type": "single", "label": "How will the model be used?",
+          "options": [
+            { "value": "analysis", "label": "One-off analysis or research study" },
+            { "value": "decision_support", "label": "Decision support with a human reviewing outputs" },
+            { "value": "operational", "label": "Operational system, run repeatedly" },
+            { "value": "autonomous", "label": "Acts without a human in the loop" }
+          ] },
+        { "id": "intended_use_documented", "type": "bool", "label": "The intended use is written down and agreed" },
+        { "id": "operating_domain_documented", "type": "bool", "label": "The operating domain (conditions, ranges, populations) is written down" },
+        { "id": "shift_expected", "type": "bool", "label": "Operating conditions are expected to differ from the training data" }
+      ]
+    },
+    {
+      "id": "decision", "title": "Decision context", "kind": "taxonomy",
+      "help": "The mission or domain the model supports.",
+      "questions": [
+        { "id": "decision_context", "type": "text", "label": "Decision context", "placeholder": "e.g. Aircraft component health" },
+        { "id": "domain_expertise", "type": "text", "label": "Domain expertise needed", "placeholder": "e.g. Acoustic emission / NDE, composites" }
+      ]
+    },
+    {
+      "id": "solution", "title": "Solution space", "kind": "taxonomy",
+      "help": "Question → problem → phenomena. The kind of claim you want to make sets how much structural evidence you need.",
+      "questions": [
+        { "id": "question", "type": "text", "label": "Question the model answers", "placeholder": "e.g. Does AE data show that a component is damaged?" },
+        { "id": "claim", "type": "single", "label": "Kind of claim",
+          "options": [
+            { "value": "association", "label": "Association", "hint": "Predict or classify from observations" },
+            { "value": "intervention", "label": "Intervention", "hint": "Reason about what happens if we act" },
+            { "value": "counterfactual", "label": "Counterfactual", "hint": "Reason about what would have happened" }
+          ] }
+      ]
+    },
+    {
+      "id": "mappings", "title": "Space of mappings", "kind": "taxonomy",
+      "help": "Domain and range of the map the model learns.",
+      "questions": [
+        { "id": "inputs", "type": "multi", "label": "Input data types (domain)",
+          "options": [
+            { "value": "continuous", "label": "Continuous" },
+            { "value": "ordinal", "label": "Ordinal" },
+            { "value": "categorical", "label": "Categorical" },
+            { "value": "time_series", "label": "Time series" },
+            { "value": "waveform", "label": "Raw waveform / signal" },
+            { "value": "image", "label": "Image" },
+            { "value": "spatial_field", "label": "Spatial field / mesh" },
+            { "value": "text", "label": "Text" }
+          ] },
+        { "id": "output", "type": "single", "label": "Output type (range)",
+          "options": [
+            { "value": "categorical", "label": "Categorical (classification)" },
+            { "value": "continuous", "label": "Continuous (regression)" },
+            { "value": "structured", "label": "Structured (field, sequence, graph)" },
+            { "value": "generated", "label": "Generated content (text, images)" }
+          ] },
+        { "id": "learning", "type": "single", "label": "Learning setting",
+          "options": [
+            { "value": "supervised", "label": "Supervised" },
+            { "value": "unsupervised", "label": "Unsupervised" },
+            { "value": "reinforcement", "label": "Reinforcement" },
+            { "value": "generative", "label": "Generative" }
+          ] }
+      ]
+    },
+    {
+      "id": "representation", "title": "Numerical representation", "kind": "taxonomy",
+      "help": "How much explicit, implicit, and empirical knowledge the model carries.",
+      "questions": [
+        { "id": "representation", "type": "single", "label": "Knowledge in the model",
+          "options": [
+            { "value": "empirical", "label": "Empirical only", "hint": "Learned from data, no encoded physics" },
+            { "value": "hybrid", "label": "Hybrid", "hint": "First-principles structure plus learned components" },
+            { "value": "mechanistic", "label": "Explicit mechanistic", "hint": "Governing equations; data used to calibrate and validate" }
+          ] }
+      ]
+    },
+    {
+      "id": "semantics", "title": "Semantics", "kind": "taxonomy",
+      "help": "How the model's results are interpreted.",
+      "questions": [
+        { "id": "semantics", "type": "single", "label": "Interpretation of results",
+          "options": [
+            { "value": "descriptive", "label": "Descriptive" },
+            { "value": "diagnostic", "label": "Diagnostic" },
+            { "value": "predictive", "label": "Predictive" },
+            { "value": "forecasting", "label": "Forecasting" },
+            { "value": "prescriptive", "label": "Prescriptive" }
+          ] }
+      ]
+    },
+    {
+      "id": "constraints", "title": "Phenomena constraints", "kind": "taxonomy",
+      "help": "Known constraints and data handling applied to the phenomena.",
+      "questions": [
+        { "id": "constraints", "type": "multi", "label": "Constraints applied",
+          "options": [
+            { "value": "encoding", "label": "Categorical encoding (e.g. one-hot)" },
+            { "value": "feature_engineering", "label": "Feature engineering" },
+            { "value": "dimension_reduction", "label": "Dimension reduction" },
+            { "value": "monotonic", "label": "Monotonicity or shape constraints" },
+            { "value": "invariance", "label": "Symmetry or invariance constraints" },
+            { "value": "physics_regularization", "label": "Physics-based regularization" }
+          ] }
+      ]
+    },
+    {
+      "id": "architecture", "title": "Architecture / algorithm", "kind": "taxonomy",
+      "help": "The model family you use or propose.",
+      "questions": [
+        { "id": "algorithm", "type": "single", "label": "Model family",
+          "options": [
+            { "value": "linear", "label": "Linear / GLM" },
+            { "value": "tree_ensemble", "label": "Tree ensemble (random forest, boosting)" },
+            { "value": "kernel", "label": "Kernel method (SVM)" },
+            { "value": "gp", "label": "Gaussian process" },
+            { "value": "mlp", "label": "Feed-forward neural network" },
+            { "value": "cnn", "label": "Convolutional neural network" },
+            { "value": "sequence", "label": "Recurrent / transformer sequence model" },
+            { "value": "pinn", "label": "Physics-informed neural network" },
+            { "value": "foundation", "label": "Foundation model / LLM" }
+          ] }
+      ]
+    },
+    {
+      "id": "team", "title": "Your team", "kind": "team",
+      "help": "Check the roles you already have. Anything recommended but unchecked is reported as a staffing gap.",
+      "questions": [
+        { "id": "roles", "type": "multi", "label": "Roles on the team", "options_from": "roles" }
+      ]
+    }
+  ]
+}
